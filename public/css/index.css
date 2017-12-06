@@ -39,30 +39,29 @@ body,
 html {
 	width: 100%;
 	margin: 0 auto;
-  font-family: "Open sans";
 }
 header{
   flex-direction: row;
   display: flex;
   background: white;
   margin: 0;
-  padding: 20px;
+  padding: 1rem;
   top: 0;
   left: 0;
   width: 100%;
   box-shadow: 0 0px 17px 1px #6f6f6f;
   background-color: white;
   position: sticky;
+  z-index: 3;
 }
 h1 {
   margin: 0;
   display: inline-block;
 }
 .masonry-layout {
-	margin-top: 10px;
+	margin-top: 1rem;
 	display: flex;
 	flex-direction: row;
-	padding: 10px;
 	justify-content: center;
 }
 .masonry-layout-column {
@@ -71,26 +70,27 @@ h1 {
 	flex-direction: column;
 	flex-grow: 0;
 	max-width: 33%;
+	padding: 1rem;
 }
-masonry-panel {
-	margin: 10px;
-	padding: 5px;
-	border-radius: 10px;
-   box-shadow: 0 0 3px 1px #757575;
-	transition-property: opacity;
-	transition-duration: 4s;
+.mdc-card{
+  margin-bottom: 2rem;
 }
 img{
 	max-width: 100%;
 }
-button {
-  background: white;
-  border: none;
-  border-radius: 5px;
-  margin: 0 10px;
-  box-shadow: inset 0px 1px 1px 0.5px #8c8c8c, 0px 3px 1px 0px #8c8c8c;
+.hidden{
+  display: none;
 }
-
+i.mdc-icon-toggle.material-icons{
+    margin-left: 96px;
+}
+.mdc-card__supporting-text:last-child{
+  margin: 0;
+  padding: 0 0 1rem 0;
+}
+.heart{
+  color: #F44336;
+}
 #spacer {
     flex-grow: 1;
 }

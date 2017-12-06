@@ -3,30 +3,23 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="preconnect" href="https://cors-anywhere.herokuapp.com/">
-    <link rel="preconnect" href="https://thecatapi.com/">
     <title>Vote Cats</title>
 
+    <!-- <link rel="preconnect" href="https://cors-anywhere.herokuapp.com/">
+    <link rel="preconnect" href="https://thecatapi.com/"> -->
+    <link rel="stylesheet" href="node_modules/material-components-web/dist/material-components-web.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href = "/css/index.css">
-
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/4.7.0/firebase-app.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/4.7.0/firebase-auth.js"></script>
-    <script defer src="/__/firebase/4.7.0/firebase-database.js"></script>
-    <script defer src="/__/firebase/4.7.0/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/4.7.0/firebase-storage.js"></script>
-    <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
 
 
   </head>
-  <body>
-    <header>
-      <h1>Header</h1>
+  <body class="mdc-typography">
+    <header class = "mdc-elevation--z9">
+      <h1>Vote Cats</h1>
       <span id="spacer"></span>
-      <button>Sign in / sign up with Google</button>
-      <button>Sign out</button>
+      <button class="mdc-button" data-mdc-auto-init="MDCRipple">Programmer5000</button>
+      <button class = "sign-in mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple" data-auth-name = "Google">Sign in / sign up with Google</button>
+      <button id = "sign-out" class = "hidden mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">Sign out</button>
     </header>
 
     <div class="masonry-layout">
@@ -43,14 +36,21 @@
       <div class="masonry-layout-panel">
         <!-- <h2>A cute cat</h2> -->
         <slot name = "img">The image could not be loaded.</slot>
-        <p>
+        <p class = "mdc-card__supporting-text">
           From <slot name = "src">
           <a href = "https://thecatapi.com">The Cat API</a>
           </slot>. <button class = "delete">Delete</button>
         </p>
       </div>
     </template>
-
+    <script src="/__/firebase/4.7.0/firebase-app.js"></script>
+    <script src="/__/firebase/4.7.0/firebase-auth.js"></script>
+    <!-- <script defer src="/__/firebase/4.7.0/firebase-database.js"></script>
+    <script defer src="/__/firebase/4.7.0/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/4.7.0/firebase-storage.js"></script> -->
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script src="/__/firebase/init.js"></script>
+    <script src="node_modules/material-components-web/dist/material-components-web.js"></script>
     <script src = "/js/index.js"></script>
   </body>
 </html>

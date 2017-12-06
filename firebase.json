@@ -1,0 +1,20 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "SUPERPRIVATEKEY.json"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**", "function": "cats"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="preconnect" href="https://cors-anywhere.herokuapp.com/">
+    <link rel="preconnect" href="https://thecatapi.com/">
+    <title>Vote Cats</title>
+
+    <link rel="stylesheet" href = "/css/index.css">
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/4.7.0/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/4.7.0/firebase-auth.js"></script>
+    <script defer src="/__/firebase/4.7.0/firebase-database.js"></script>
+    <script defer src="/__/firebase/4.7.0/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/4.7.0/firebase-storage.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+
+  </head>
+  <body>
+    <header>
+      <h1>Header</h1>
+      <span id="spacer"></span>
+      <button>Sign in / sign up with Google</button>
+      <button>Sign out</button>
+    </header>
+
+    <div class="masonry-layout">
+      <div class="masonry-layout-column">
+      </div>
+      <div class="masonry-layout-column">
+      </div>
+      <div class="masonry-layout-column">
+      </div>
+    </div>
+
+    <!-- Templates -->
+    <template id = "panel-template">
+      <div class="masonry-layout-panel">
+        <!-- <h2>A cute cat</h2> -->
+        <slot name = "img">The image could not be loaded.</slot>
+        <p>
+          From <slot name = "src">
+          <a href = "https://thecatapi.com">The Cat API</a>
+          </slot>. <button class = "delete">Delete</button>
+        </p>
+      </div>
+    </template>
+
+    <script src = "/js/index.js"></script>
+  </body>
+</html>

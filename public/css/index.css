@@ -1,0 +1,96 @@
+/* latin-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans Regular'), local('OpenSans-Regular'), url(https://fonts.gstatic.com/s/opensans/v15/u-WUoqrET9fUeobQW7jkRRJtnKITppOI_IvcXXDNrsc.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans Regular'), local('OpenSans-Regular'), url(https://fonts.gstatic.com/s/opensans/v15/cJZKeOuBrn4kERxqtaUH3VtXRa8TVwTICgirnJhmVJw.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(https://fonts.gstatic.com/s/opensans/v15/k3k702ZOKiLJc3WVjuplzD0LW-43aMEzIO6XUTLjad8.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(https://fonts.gstatic.com/s/opensans/v15/k3k702ZOKiLJc3WVjuplzOgdm0LZdjqr5-oayXSOefg.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+}
+
+
+* {
+	box-sizing: border-box;
+}
+body,
+html {
+	width: 100%;
+	margin: 0 auto;
+  font-family: "Open sans";
+}
+header{
+  flex-direction: row;
+  display: flex;
+  background: white;
+  margin: 0;
+  padding: 20px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-shadow: 0 0px 17px 1px #6f6f6f;
+  background-color: white;
+  position: sticky;
+}
+h1 {
+  margin: 0;
+  display: inline-block;
+}
+.masonry-layout {
+	margin-top: 10px;
+	display: flex;
+	flex-direction: row;
+	padding: 10px;
+	justify-content: center;
+}
+.masonry-layout-column {
+	display: flex;
+	flex-basis: 33%;
+	flex-direction: column;
+	flex-grow: 0;
+	max-width: 33%;
+}
+masonry-panel {
+	margin: 10px;
+	padding: 5px;
+	border-radius: 10px;
+   box-shadow: 0 0 3px 1px #757575;
+	transition-property: opacity;
+	transition-duration: 4s;
+}
+img{
+	max-width: 100%;
+}
+button {
+  background: white;
+  border: none;
+  border-radius: 5px;
+  margin: 0 10px;
+  box-shadow: inset 0px 1px 1px 0.5px #8c8c8c, 0px 3px 1px 0px #8c8c8c;
+}
+
+#spacer {
+    flex-grow: 1;
+}

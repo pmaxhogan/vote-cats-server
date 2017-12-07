@@ -86,19 +86,20 @@ firebase.auth().onAuthStateChanged(function(user) {
     console.log("SIGNED IN", {displayName, email, emailVerified, photoURL, isAnonymous, uid, providerData});
 
     firebase.auth().currentUser.getIdToken().then(console.log)
-    document.querySelectorAll(".sign-in").forEach(button => button.classList.add("hidden"));
-    $("#sign-out").classList.remove("hidden");
+    $("#signed-out").classList.add("hidden");
+    $("#signed-in").classList.remove("hidden");
+
+    $("#profile").innerHTML = `<img src = "${user.photoURL}" class = "logo-button"/>`;
   } else {
     // User is signed out.
     console.log("SIGNED OUT");
-    document.querySelectorAll(".sign-in").forEach(button => button.classList.remove("hidden"));
-    $("#sign-out").classList.add("hidden");
+    $("#signed-out").classList.remove("hidden")
+    $("#signed-in").classList.add("hidden");
   }
 });
 
-$("#sign-out").onclick = () => firebase.auth().signOut();
+$("button#sign-out").onclick = () => firebase.auth().signOut();
 document.querySelectorAll(".sign-in").forEach(button => button.onclick = () => {
-console.log(button);
-  if(button.id === "sign-in-with") return;
+  console.log(button);
   firebase.auth().signInWithPopup(new firebase.auth[button.dataset.authName + "AuthProvider"]());
 });

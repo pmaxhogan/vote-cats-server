@@ -98,7 +98,17 @@ i.mdc-icon-toggle.material-icons{
   margin: 17px;
   padding: 0;
 }
-#right-nav-bar{
+#right-nav-bar:not(.hidden),#signed-in:not(.hidden),#signed-out:not(.hidden){
   display: flex;
   align-items: center;
+}
+#sign-in-width{
+  padding: 0 17px;
+}
+#signed-out button,#signed-in button{
+  background-color: var(--mdc-theme-text-primary-on-primary, #fff);
+}
+.logo-button{
+  height: 100%;
+  margin: 3px 0px 3px;
 }

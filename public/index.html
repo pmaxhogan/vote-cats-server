@@ -14,12 +14,21 @@
 
   </head>
   <body class="mdc-typography">
-    <header class = "mdc-elevation--z9">
-      <h1>Vote Cats</h1>
-      <span id="spacer"></span>
-      <button class="mdc-button" data-mdc-auto-init="MDCRipple">Programmer5000</button>
-      <button class = "sign-in mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple" data-auth-name = "Google">Sign in / sign up with Google</button>
-      <button id = "sign-out" class = "hidden mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">Sign out</button>
+    <header class="mdc-toolbar">
+      <div class="mdc-toolbar__row">
+        <section class="mdc-toolbar__section mdc-toolbar__section--align-start">
+          <a href="#" class="material-icons mdc-toolbar__menu-icon">menu</a>
+          <h1 class="mdc-toolbar__title">Vote Cats</h1>
+        </section>
+        <section class = "mdc-toolbar__section mdc-toolbar__section--align-end" id = "right-nav-bar">
+          <button class="mdc-button" data-mdc-auto-init="MDCRipple">Programmer5000</button>
+          <h2 id = "sign-in-with" class="hidden sign-in mdc-typography--subheading2">Sign in with</h2>
+          <button class = "hidden sign-in mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple" data-auth-name = "Google"><img src="/img/google_logo.png" style="
+          height: 100%;
+          margin: 3px 0px 3px;
+          "></button>
+          <button id = "sign-out" class = "hidden mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">Sign out</button></section>
+      </div>
     </header>
 
     <div class="masonry-layout">

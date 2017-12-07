@@ -98,5 +98,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 
 $("#sign-out").onclick = () => firebase.auth().signOut();
 document.querySelectorAll(".sign-in").forEach(button => button.onclick = () => {
+console.log(button);
+  if(button.id === "sign-in-with") return;
   firebase.auth().signInWithPopup(new firebase.auth[button.dataset.authName + "AuthProvider"]());
 });

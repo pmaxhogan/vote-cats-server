@@ -33,12 +33,12 @@
 
 
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 body,
 html {
-	width: 100%;
-	margin: 0 auto;
+  width: 100%;
+  margin: 0 auto;
 }
 header{
   flex-direction: row;
@@ -59,30 +59,30 @@ h1 {
   display: inline-block;
 }
 .masonry-layout {
-	margin-top: 1rem;
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 .masonry-layout-column {
-	display: flex;
-	flex-basis: 33%;
-	flex-direction: column;
-	flex-grow: 0;
-	max-width: 33%;
-	padding: 1rem;
+  display: flex;
+  flex-basis: 33%;
+  flex-direction: column;
+  flex-grow: 0;
+  max-width: 33%;
+  padding: 1rem;
 }
 .mdc-card{
   margin-bottom: 2rem;
 }
 img{
-	max-width: 100%;
+  max-width: 100%;
 }
 .hidden{
   display: none;
 }
 i.mdc-icon-toggle.material-icons{
-    margin-left: 96px;
+  margin-left: 96px;
 }
 .mdc-card__supporting-text:last-child{
   margin: 0;
@@ -92,5 +92,13 @@ i.mdc-icon-toggle.material-icons{
   color: #F44336;
 }
 #spacer {
-    flex-grow: 1;
+  flex-grow: 1;
+}
+#sign-in-with{
+  margin: 17px;
+  padding: 0;
+}
+#right-nav-bar{
+  display: flex;
+  align-items: center;
 }

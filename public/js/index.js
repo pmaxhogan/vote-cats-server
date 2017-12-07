@@ -89,7 +89,11 @@ firebase.auth().onAuthStateChanged(function(user) {
     $("#signed-out").classList.add("hidden");
     $("#signed-in").classList.remove("hidden");
 
-    $("#profile").innerHTML = `<img src = "${user.photoURL}" class = "logo-button"/>`;
+    const text = $("#profile").querySelector("span");
+    text.innerText = displayName;
+
+    const img = $("#profile").querySelector("img");
+    img.src = user.photoURL;
   } else {
     // User is signed out.
     console.log("SIGNED OUT");

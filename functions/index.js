@@ -1,24 +1,33 @@
+console.log("require google");
+
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+
+console.log("require non - google");
+
 const express = require("express");
 const app = express();
 const base = "/api/v1/";
+
+
+console.log("init");
+
+try{
+// Initialize the app with a service account, granting admin privileges
+admin.initializeApp(functions.config().firebase);
+
+const db = admin.firestore();
+//const bucket = admin.storage().bucket();
+
+const imagesRef = db.collection("images");
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
 
-// Fetch the service account key JSON file contents
-var serviceAccount = require("./SUPERPRIVATEKEY.json");
-
-// Initialize the app with a service account, granting admin privileges
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://vote-cats.firebaseio.com/",
-  storageBucket: "vote-cats.appspot.com"
-});
 
 const shortCache = (req, res, next) => {
+console.log("hi");
   res.set("Cache-Control", "private, max-age=1");
   next();
 };
@@ -51,7 +60,25 @@ app.get(base, (req, res) => {
 });
 
 app.get(base + "picts/new", (req, res) => {
-
+  let start = 0;
+  let end = 20;
+  if(req.query.start || req.query.end){
+    start = Math.max(Math.min(parseInt(req.query.start), 1000000), 0);
+    end = Math.min(Math.max(Math.min(parseInt(req.query.end), 1000000), 0), start);
+    if(typeof start !== "number" || typeof end !== "number" || Number.isNaN(start) || Number.isNaN(start)){
+      return res.status(400).json({"error": "Invalid or missing start / end query parameter"});
+    }
+  }
+  imagesRef.orderBy("timeStamp", "desc").orderBy("usersVoted", "desc").startAt(start).endAt(end).then(snapshot => {
+    let data = {};
+    snapshot.forEach(doc => {
+      data[doc.id] = doc.data();
+    });
+    res.json(data);
+  });
 });
 
 exports.cats = functions.https.onRequest(app);
+}catch(e){
+console.error(e.toString());
+}

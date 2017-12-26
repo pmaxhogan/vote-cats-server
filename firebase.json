@@ -9,7 +9,8 @@
     ],
     "rewrites": [
       {
-        "source": "/api/**", "function": "cats"
+        "source": "/api/**",
+        "function": "cats"
       },
       {
         "source": "**",

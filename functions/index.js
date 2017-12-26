@@ -69,7 +69,9 @@ app.get(base + "picts/new", (req, res) => {
       return res.status(400).json({"error": "Invalid or missing start / end query parameter"});
     }
   }
-  imagesRef.orderBy("timeStamp", "desc").orderBy("usersVoted", "desc").startAt(start).endAt(end).then(snapshot => {
+  const prom = imagesRef.orderBy("timeStamp", "desc").orderBy("usersVoted", "desc").startAt(start).endAt(end);
+  console.log(prom);
+  prom.then(snapshot => {
     let data = {};
     snapshot.forEach(doc => {
       data[doc.id] = doc.data();

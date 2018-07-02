@@ -14,7 +14,7 @@ console.log("init");
 
 try{
 // Initialize the app with a service account, granting admin privileges
-admin.initializeApp(functions.config().firebase);
+admin.initializeApp();
 
 const db = admin.firestore();
 //const bucket = admin.storage().bucket();

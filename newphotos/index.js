@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 const {parseString} = require("xml2js");
 
 const basePath = process.env.BASEPATH || process.argv[2] || (process.env.NODE_ENV === "production" ? "images" : "") ||  "test_images";
+console.log(basePath);
 
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp({storageBucket: "vote-cats.appspot.com"});

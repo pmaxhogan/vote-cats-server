@@ -13,6 +13,13 @@
 				{ "fieldPath": "timeStamp", "mode": "DESCENDING" },
 				{ "fieldPath": "numUsersVoted", "mode": "DESCENDING" }
 			]
+		},
+		{
+			"collectionId": "test",
+			"fields": [
+				{ "fieldPath": "timeStamp", "mode": "DESCENDING" },
+				{ "fieldPath": "score", "mode": "DESCENDING" }
+			]
 		}
 	]
 }

@@ -1,4 +1,5 @@
 console.log("require google");
+Error.stackTraceLimit = 40;
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
@@ -34,7 +35,7 @@ const shortCache = (req, res, next) => {
   next();
 };
 
-app.use(shortCache);
+// app.use(shortCache);
 
 const authenticate = (req, res, next) => {
   if(req.query.token){
@@ -62,26 +63,32 @@ app.get(base, (req, res) => {
 });
 
 app.get(base + "picts/get", (req, res) => {
-  let start = 0;
-  let end = 20;
-  if(req.query.start || req.query.end){
-    start = Math.max(Math.min(parseInt(req.query.start), 1000000), 0);
-    end = Math.max(Math.min(parseInt(req.query.end), 1000000), start);
-    if(typeof start !== "number" || typeof end !== "number" || Number.isNaN(start) || Number.isNaN(start)){
-      return res.status(400).json({"error": "Invalid or missing start / end query parameter"});
+  let startAfter = new Date;
+  let limit = 20;
+  if(req.query.startAfter){
+    start = new Date(Date.parse(parseInt(req.query.startAfter)));
+    if(typeof start !== "object"|| Number.isNaN(parseInt(req.query.startAfter))){
+      return res.status(400).json({"error": "Invalid start query parameter. It should be a date parseable with Date.parse()"});
     }
   }
-	console.log("start", start, req.query.start, "end", end, req.query.end);
-  const prom = imagesRef.
+  if(req.query.limit){
+    limit = parseInt(req.query.limit);
+    if(Number.isNaN(limit) || limit < 1){
+      return res.status(400).json({"error": "Invalid limit query parameter. It should be an integer"});
+    }
+  }
+	console.log("start", start, req.query.start, "limit", limit, req.query.limit);
+
+	let prom = imagesRef.
 	orderBy("timeStamp", "desc").
 	orderBy("numUsersVoted", "desc").
-	startAt(start).
-	limit(end - start + 1).
-	get();
-  prom.then(snapshot => {
-    let data = {};
-		console.log(snapshot.docs);
+	startAfter(startAfter).
+	limit(limit).
+	get().
+  then(snapshot => {
+    const data = [];
     snapshot.forEach(doc => {
+			data.push(doc.data());
       data[doc.id] = doc.data();
     });
     res.json(data);

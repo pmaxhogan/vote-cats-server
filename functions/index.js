@@ -66,7 +66,7 @@ app.get(base + "picts/get", (req, res) => {
   let startAfter = new Date;
   let limit = 20;
   if(req.query.startAfter){
-    startAfter = new Date(Date.parse(parseInt(req.query.startAfter)));
+    startAfter = new Date(Date.parse(req.query.startAfter));
     if(typeof startAfter !== "object"|| Number.isNaN(parseInt(req.query.startAfter))){
       return res.status(400).json({"error": "Invalid start query parameter. It should be a date parseable with Date.parse()"});
     }

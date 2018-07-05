@@ -32,30 +32,40 @@ const getShortestColumn = () => {
   return columns[heights.indexOf(Math.min(...heights))];
 };
 
+let lastTimeStamp;
+
 const addImgs = num => {
-  for(let i = 0; i < num; i++){
-    fetch("https://random.cat/meow").then(x=>x.json()).then(data => {
-      const panel = document.createElement("div");
-      panel.classList.add("mdc-card");
-      panel.innerHTML = `
-  <!-- <h2>A cute cat</h2> -->
-  <img class = "mdc-card__media" crossorigin = "anonymous" src = "https://cors-anywhere.herokuapp.com/${data.file}"/>
-  <p class="mdc-card__supporting-text">
-  <i class="heart mdc-icon-toggle material-icons" role="button" aria-pressed="false"
-     aria-label="Add to favorites" tabindex="0"
-     data-toggle-on='{"label": "Remove from favorites", "content": "favorite"}'
-     data-toggle-off='{"label": "Add to favorites", "content": "favorite_border"}'>
-    favorite_border
-  </i>
-  <i class="mdc-icon-toggle material-icons" role="button" aria-pressed="false"
-     aria-label="Delete this picture" tabindex="0">
-    delete
-  </i>
-  </p>`;
-      getShortestColumn().appendChild(panel);
-      mdc.iconToggle.MDCIconToggle.attachTo(panel.querySelector("i"));
-    });
-  }
+	let params = "";
+	if(lastTimeStamp){
+		params = "&startAfter=" + lastTimeStamp;
+	}
+  fetch("/api/v1/picts/get?limit=" + num + params).then(x=>x.json()).then(data => {
+		data.forEach(pict => {
+	    const panel = document.createElement("div");
+	    panel.classList.add("mdc-card");
+			panel.setAttribute("data-timestamp", pict.timeStamp);
+	    panel.innerHTML = `
+<!-- <h2>A cute cat</h2> -->
+<img class = "mdc-card__media" src = "${pict.url}"/>
+<p class="mdc-card__supporting-text">
+	<i class="heart mdc-icon-toggle material-icons" role="button" aria-pressed="false"
+	   aria-label="Add to favorites" tabindex="0"
+	   data-toggle-on='{"label": "Remove from favorites", "content": "favorite"}'
+	   data-toggle-off='{"label": "Add to favorites", "content": "favorite_border"}'>
+	  favorite_border
+	</i>
+	<i class="mdc-icon-toggle material-icons" role="button" aria-pressed="false"
+	   aria-label="Delete this picture" tabindex="0">
+	  delete
+	</i>
+</p>`;
+	    getShortestColumn().appendChild(panel);
+	    mdc.iconToggle.MDCIconToggle.attachTo(panel.querySelector("i"));
+
+			lastTimeStamp = pict.timeStamp;
+	  });
+	});
+	console.log(lastTimeStamp);
 };
 addImgs(15);
 

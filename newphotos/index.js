@@ -79,5 +79,5 @@ imagesRef.get().then(snapshot => {
 
   newImg();
 
-  setInterval(newImg, 1000);
+  setInterval(newImg, 1500);
 });

@@ -39,8 +39,11 @@ const addImgs = num => {
 	if(lastTimeStamp){
 		params = "&startAfter=" + lastTimeStamp;
 	}
-  fetch("/api/v1/picts/get?limit=" + num + params).then(x=>x.json()).then(data => {
-		data.forEach(pict => {
+	const url = "/api/v1/picts/get?limit=" + num + params;
+	console.log(url);
+  return fetch(url).then(x=>x.json()).then(data => {
+		data.forEach(pict=>pict.date = Date.parse(pict.timeStamp));
+		data.sort((a, b) => b.date - a.date).forEach(pict => {
 	    const panel = document.createElement("div");
 	    panel.classList.add("mdc-card");
 			panel.setAttribute("data-timestamp", pict.timeStamp);
@@ -61,21 +64,23 @@ const addImgs = num => {
 </p>`;
 	    getShortestColumn().appendChild(panel);
 	    mdc.iconToggle.MDCIconToggle.attachTo(panel.querySelector("i"));
-
+			// console.log("\t" + pict.timeStamp);
 			lastTimeStamp = pict.timeStamp;
 	  });
+		// console.log(lastTimeStamp, num);
 	});
-	console.log(lastTimeStamp);
 };
 addImgs(15);
 
 let last = 0;
+let isLoading = false;
 onscroll = e => {
-  if(Date.now() - last > 100){
+  if(Date.now() - last > 1000 && !isLoading){
     last = Date.now();
     const pixels = calcPixelsLeft();
     if(pixels < 200){
-      addImgs(20);
+			isLoading = true;
+      addImgs(20).then(() => isLoading = false);
       console.log(pixels);
       last -= 750;
     }

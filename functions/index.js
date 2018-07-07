@@ -84,9 +84,12 @@ app.get(base + "picts/get", (req, res) => {
   });
 });
 
-app.use(base + "picts/:id", (req, res) => {
-	imagesRef.get(req.params.id);
-	res.end();
+app.get(base + "picts/:id", (req, res) => {
+	imagesRef.doc(req.params.id).get().then(doc => {
+		console.log(doc);
+		if(!doc.exists) return res.status(404).end();
+		res.json(doc.data());
+	});
 });
 
 exports.cats = functions.https.onRequest(app);

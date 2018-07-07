@@ -92,6 +92,31 @@ app.get(base + "picts/:id", (req, res) => {
 	});
 });
 
+app.use([base + "picts/:id/favorite", base + "picts/:id/unfavorite"], authenticate);
+
+const getFavorite = isFavorite => (req, res) => {
+	const image = imagesRef.doc(req.params.id);
+	image.get().then(doc => {
+		console.log(doc);
+		if(!doc.exists) return res.status(404).end();
+		const data = doc.data();
+
+		// short version of ensuring that you can't favorite something already favorited and the reverse also
+		if(isFavorite === data.usersVoted.includes(req.user.uid)) return res.status(400).end();
+		const newData = {
+			numUsersVoted: data.numUsersVoted + (isFavorite ? 1 : -1),
+			usersVoted: (isFavorite ?
+				data.usersVoted.concat(req.user.uid) :
+				data.usersVoted.filter(user => user !== req.user.uid)
+			)
+		};
+		image.update(newData).then(() => res.json(Object.assign(data, newData)));
+	});
+};
+
+app.put(base + "picts/:id/favorite", getFavorite(true));
+app.put(base + "picts/:id/unfavorite", getFavorite(false));
+
 exports.cats = functions.https.onRequest(app);
 }catch(e){
 console.error(e.toString());

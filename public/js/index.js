@@ -1,6 +1,5 @@
 mdc.autoInit();
 
-
 scrollTo(0, 0);
 
 const $ = selector => document.querySelector(selector);

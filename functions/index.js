@@ -1,17 +1,10 @@
-console.log("require google");
-Error.stackTraceLimit = 40;
-
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
-console.log("require non - google");
-
 const express = require("express");
 const app = express();
+
 const base = "/api/v1/";
-
-
-console.log("init");
 
 try{
 // Initialize the app with a service account, granting admin privileges
@@ -25,17 +18,13 @@ console.log(basePath);
 
 const imagesRef = db.collection(basePath);
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
 
-
-const shortCache = (req, res, next) => {
+const noCache = (req, res, next) => {
   res.set("Cache-Control", "private, max-age=1");
   next();
 };
 
-// app.use(shortCache);
+// app.use(noCache);
 
 const authenticate = (req, res, next) => {
   if(req.query.token){
@@ -93,6 +82,11 @@ app.get(base + "picts/get", (req, res) => {
     });
     res.json(data);
   });
+});
+
+app.use(base + "picts/:id", (req, res) => {
+	imagesRef.get(req.params.id);
+	res.end();
 });
 
 exports.cats = functions.https.onRequest(app);

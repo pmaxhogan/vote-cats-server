@@ -12,7 +12,7 @@ admin.initializeApp();
 const db = admin.firestore();
 //const bucket = admin.storage().bucket();
 
-const basePath = process.env.BASEPATH || (process.env.NODE_ENV === "production" ? "images" : "") ||  "test_images";
+const basePath = process.env.BASEPATH || (process.env.NODE_ENV === "production" ? "images" : "") ||  "images";
 console.log(basePath);
 
 const imagesRef = db.collection(basePath);

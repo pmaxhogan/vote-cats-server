@@ -109,11 +109,13 @@ i.mdc-icon-toggle.material-icons{
   background-color: var(--mdc-theme-text-primary-on-primary, #fff);
 }
 .logo-button{
-  height: 100%;
-  /*margin: 3px 0px 3px;*/
-  margin: 0;
-  vertical-align: middle;
-  padding: 3px 0px 3px 6px;
+	height: 100%;
+	margin: 0;
+	vertical-align: middle;
+	padding: 3px 0px 3px 6px;
+	/* max-height: 100%; */
+	object-fit: contain;
+	width: 40px;
 }
 #signed-in > button:not(:last-child), #signed-out > button:not(:last-child) {
     margin-right: 16px;

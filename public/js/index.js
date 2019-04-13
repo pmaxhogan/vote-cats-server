@@ -47,6 +47,10 @@ const addImgs = num => {
 	const url = "/api/v1/picts/get?limit=" + num + params;
 	console.log(url);
   return fetch(url).then(x=>x.json()).then(data => {
+		// if we didn't get anything, tell the user
+		if(!data.length) $("#no-more").removeAttribute("hidden");
+		// else $("#no-more").setAttribute("hidden")
+
 		data.forEach(pict=>pict.date = Date.parse(pict.timeStamp));
 		data.sort((a, b) => b.date - a.date).forEach(pict => {
 	    const panel = document.createElement("div");
@@ -68,7 +72,7 @@ const addImgs = num => {
 	</i>
 </p>`;
 	    getShortestColumn().appendChild(panel);
-	    mdc.iconToggle.MDCIconToggle.attachTo(panel.querySelector("i"));
+	    mdc.iconButton.MDCIconButtonToggle.attachTo(panel.querySelector("i"));
 			panel.querySelector(".delete").addEventListener("click", () => {
 				fetchWithAuth("/api/v1/admin/picts/delete/" + pict.timeStamp).then(() => {
 					panel.remove();

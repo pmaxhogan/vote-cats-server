@@ -9,6 +9,6 @@
   "author": "programmer5000",
   "license": "GPL-3.0",
   "dependencies": {
-    "material-components-web": "^0.26.0"
+    "material-components-web": "^1.1.1"
   }
 }

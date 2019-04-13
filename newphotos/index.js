@@ -2,6 +2,7 @@ const admin = require("firebase-admin");
 const fetch = require("node-fetch");
 const {parseString} = require("xml2js");
 
+
 const basePath = process.env.BASEPATH || process.argv[2] || (process.env.NODE_ENV === "production" ? "images" : "") ||  "test_images";
 console.log(basePath);
 
@@ -10,7 +11,7 @@ admin.initializeApp({storageBucket: "vote-cats.appspot.com"});
 
 // As an admin, the app has access to read and write all data, regardless of Security Rules
 const db = admin.firestore();
-const bucket = admin.storage().bucket();
+const storageRef = admin.storage().bucket();
 
 const imagesRef = db.collection(basePath);
 
@@ -34,6 +35,9 @@ const imgSchema = {
 };
 
 let i = 0;
+function getPublicUrl (filename) {
+  return `https://firebasestorage.googleapis.com/v0/b/vote-cats.appspot.com/o/${encodeURIComponent(filename)}?alt=media`;
+}
 
 const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDUz&format=xml").then(x=>x.text()).then(text=>{
 	parseString(text, function (err, result) {
@@ -42,27 +46,37 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 		console.log("got image", image);
 	  const URL = image.url[0];
 		const source = image.source_url[0];
+		console.log("getting", URL);
+		fetch(URL).then(res => res.buffer()).then(buffer => {
+			console.log("uploading");
+		  var options = {
+		    destination: basePath + "/" + encodeURIComponent(URL),
+		    resumable: true,
+		    validation: "crc32c"
+		  };
 
-	  var options = {
-	    destination: basePath + "/" + encodeURIComponent(URL),
-	    resumable: true,
-	    validation: "crc32c"
-	  };
+			const stream = storageRef.file(basePath + "/" + encodeURIComponent(URL)).createWriteStream({
+				gzip: true,
+		  	metadata: {
+		    	cacheControl: 'public, max-age=31536000',
+		  	}
+			});
 
-	  bucket.upload(URL, options, function(err, file) {
-	    if(err) return console.error(err);
-			file.makePublic();
-			const uploadedUrl = "https://firebasestorage.googleapis.com/v0/b/vote-cats.appspot.com/o/" + encodeURIComponent(basePath + "/" + encodeURIComponent(URL)) + "?alt=media";
+			stream.end(buffer);
+			stream.on("error", console.error);
+		  stream.on("finish", () => {
+				const uploadedUrl = getPublicUrl(basePath + "/" + encodeURIComponent(URL));
 
-      console.log(uploadedUrl);
-      const img = imgSchema;
-      img.url = uploadedUrl;
-      img.timeStamp = new Date();
-			img.source = source;
-			img.num = i;
-      i++;
-      console.log("added img", img, "num", i);
-      addDoc(img);
+	      console.log(uploadedUrl);
+	      const img = imgSchema;
+	      img.url = uploadedUrl;
+	      img.timeStamp = new Date();
+				img.source = source;
+				img.num = i;
+	      i++;
+	      console.log("added img", img, "num", i);
+	      addDoc(img);
+			});
 		});
   });
 }).catch(console.error);

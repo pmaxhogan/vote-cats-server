@@ -67,7 +67,7 @@ const addImgs = num => {
    <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
    <i class="material-icons mdc-icon-button__icon">favorite_border</i>
   </button>
-  <button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete">delete</button>
+  <button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
 </div>`;
 	    getShortestColumn().appendChild(panel);
 	    mdc.iconButton.MDCIconButtonToggle.attachTo(panel.querySelector("i"));

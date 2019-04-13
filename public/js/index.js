@@ -3,9 +3,8 @@ mdc.autoInit();
 scrollTo(0, 0);
 
 const $ = selector => document.querySelector(selector);
-const apiKey = "MjUwMDg2";
 
-const calcPixelsLeft = () => getRealHeightOfHeighestColumn() - (document.documentElement.scrollTop + window.innerHeight);
+const calcPixelsLeft = () => getRealHeightOfHighestColumn() - (document.documentElement.scrollTop + window.innerHeight);
 
 customElements.define("masonry-panel",
 class extends HTMLElement {
@@ -19,7 +18,14 @@ class extends HTMLElement {
   }
 });
 
-const getRealHeightOfHeighestColumn = () => {
+const fetchWithAuth = async (url, options = {}) => {
+	const token = await firebase.auth().currentUser.getIdToken();
+	if(!options.headers) options.headers = {};
+	options.headers.authorization = "Bearer " + token;
+	return fetch(url, options);
+};
+
+const getRealHeightOfHighestColumn = () => {
   return Array.from(getShortestColumn().children).reduce((acc, child) => child.clientHeight + acc, 0);
 };
 
@@ -36,7 +42,7 @@ let lastTimeStamp;
 const addImgs = num => {
 	let params = "";
 	if(lastTimeStamp){
-		params = "&startAfter=" + lastTimeStamp;
+		params = "&startAfter=" + lastTimeStamp.toISOString();
 	}
 	const url = "/api/v1/picts/get?limit=" + num + params;
 	console.log(url);
@@ -56,15 +62,20 @@ const addImgs = num => {
 	   data-toggle-off='{"label": "Add to favorites", "content": "favorite_border"}'>
 	  favorite_border
 	</i>
-	<i class="mdc-icon-toggle material-icons" role="button" aria-pressed="false"
+	<i class="material-icons mdc-icon-toggle delete" role="button" aria-pressed="false"
 	   aria-label="Delete this picture" tabindex="0">
 	  delete
 	</i>
 </p>`;
 	    getShortestColumn().appendChild(panel);
 	    mdc.iconToggle.MDCIconToggle.attachTo(panel.querySelector("i"));
+			panel.querySelector(".delete").addEventListener("click", () => {
+				fetchWithAuth("/api/v1/admin/picts/delete/" + pict.timeStamp).then(() => {
+					panel.remove();
+				}).catch(console.error);
+			});
 			// console.log("\t" + pict.timeStamp);
-			lastTimeStamp = pict.timeStamp;
+			lastTimeStamp = new Date(pict.timeStamp);
 	  });
 		// console.log(lastTimeStamp, num);
 	});
@@ -99,7 +110,6 @@ firebase.auth().onAuthStateChanged(function(user) {
 
     console.log("SIGNED IN", {displayName, email, emailVerified, photoURL, isAnonymous, uid, providerData});
 
-    firebase.auth().currentUser.getIdToken().then(console.log)
     $("#signed-out").classList.add("hidden");
     $("#signed-in").classList.remove("hidden");
 

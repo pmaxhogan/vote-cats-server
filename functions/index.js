@@ -6,18 +6,24 @@ const app = express();
 
 const base = "/api/v1/";
 
-try{
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp();
 
 const db = admin.firestore();
 //const bucket = admin.storage().bucket();
 
-const basePath = process.env.BASEPATH || process.argv[2] || (process.env.NODE_ENV === "production" ? "images" : "") ||  "test_images";
+const basePath = process.env.BASEPATH || (process.env.NODE_ENV === "production" ? "images" : "") ||  "test_images";
 console.log(basePath);
 
 const imagesRef = db.collection(basePath);
+const metaRef = db.collection("meta");
+const adminDoc = metaRef.doc("admins");
 
+// fixes the timestamp of an image.
+const procImageData = (data)=>{
+	data.timeStamp = data.timeStamp.toDate();
+	return data;
+};
 
 const noCache = (req, res, next) => {
   res.set("Cache-Control", "private, max-age=1");
@@ -43,12 +49,41 @@ const authenticate = (req, res, next) => {
     res.status(403).send("Invalid Token");
   });
 };
+const authenticateAdmin = (req, res, next) => {
+	if(!req.user) {
+		res.status(403).send("Unauthorized");
+		return;
+	}
+	adminDoc.get().then(doc => {
+		const data = doc.data();
+		const admins = data.adminIds;
+		if(admins.includes(req.user.uid)){
+			next();
+		}else{
+			console.log(admins, req.user.id);
+			res.status(403).send("Unauthorized");
+			return;
+		}
+	});
+};
 
-app.use(base + "authcheck", authenticate);
-app.get(base + "authcheck", (req, res) => res.send("Auth successful."));
+app.get(base + "auth", (req, res) => res.send("Auth successful."));
 
 app.get(base, (req, res) => {
   res.send("Hello, World!");
+});
+
+
+app.use(base + "admin/", authenticate);
+app.use(base + "admin/", authenticateAdmin);
+app.get(base + "admin/picts/delete/:id", (req, res) => {
+	console.log("Deleting picture", req.params.id);
+	imagesRef.doc(req.params.id).delete().then(()=>{
+		res.send("");
+	}).catch(e => {
+		console.error(e);
+		res.status(500).send(e.toString());
+	});
 });
 
 app.get(base + "picts/get", (req, res) => {
@@ -77,7 +112,7 @@ app.get(base + "picts/get", (req, res) => {
   then(snapshot => {
     const data = [];
     snapshot.forEach(doc => {
-			data.push(doc.data());
+			data.push(procImageData(doc.data()));
       data[doc.id] = doc.data();
     });
     res.json(data);
@@ -88,7 +123,7 @@ app.get(base + "picts/:id", (req, res) => {
 	imagesRef.doc(req.params.id).get().then(doc => {
 		console.log(doc);
 		if(!doc.exists) return res.status(404).end();
-		res.json(doc.data());
+		res.json(procImageData(doc.data()));
 	});
 });
 
@@ -118,6 +153,3 @@ app.put(base + "picts/:id/favorite", getFavorite(true));
 app.put(base + "picts/:id/unfavorite", getFavorite(false));
 
 exports.cats = functions.https.onRequest(app);
-}catch(e){
-console.error(e.toString());
-}

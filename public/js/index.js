@@ -1,10 +1,16 @@
 mdc.autoInit();
 
+// some browsers scroll you to where you were
 scrollTo(0, 0);
 
 const $ = selector => document.querySelector(selector);
 
-const calcPixelsLeft = () => getRealHeightOfHighestColumn() - (document.documentElement.scrollTop + window.innerHeight);
+// if if we've ran out of content
+let noMore = false;
+// the snackbar to tell us we've ran out of content
+const thatsIt = new mdc.snackbar.MDCSnackbar($(".thats-it"));
+
+const calcPixelsLeft = () => getRealHeightOfHighestColumn() - (document.documentElement.scrollTop + innerHeight);
 
 customElements.define("masonry-panel",
 class extends HTMLElement {
@@ -26,15 +32,14 @@ const fetchWithAuth = async (url, options = {}) => {
 };
 
 const getRealHeightOfHighestColumn = () => {
-  return Array.from(getShortestColumn().children).reduce((acc, child) => child.clientHeight + acc, 0);
+  return getShortestColumn().offsetHeight;
 };
 
 const getShortestColumn = () => {
+	// get all columns
   const columns = document.querySelectorAll(".masonry-layout-column");
-  const heights = Array.from(columns).map(column =>
-    Array.from(column.children).reduce((height, elem) => height + elem.offsetHeight, 0)
-  );
-  return columns[heights.indexOf(Math.min(...heights))];
+	// and return the shortest one
+  return Array.from(columns).sort((a, b) => a.offsetHeight - b.offsetHeight)[0];
 };
 
 let lastTimeStamp;
@@ -48,8 +53,8 @@ const addImgs = num => {
 	console.log(url);
   return fetch(url).then(x=>x.json()).then(data => {
 		// if we didn't get anything, tell the user
-		if(!data.length) $("#no-more").removeAttribute("hidden");
-		// else $("#no-more").setAttribute("hidden")
+		if(!data.length) noMore = true;
+		else noMore = false;
 
 		data.forEach(pict=>pict.date = Date.parse(pict.timeStamp));
 		data.sort((a, b) => b.date - a.date).forEach(pict => {
@@ -87,21 +92,26 @@ addImgs(15);
 let last = 0;
 let isLoading = false;
 onscroll = e => {
-  if(Date.now() - last > 1000 && !isLoading){
+  if(!isLoading && !noMore){
     last = Date.now();
     const pixels = calcPixelsLeft();
-    if(pixels < 200){
+    if(pixels < 400){
 			isLoading = true;
       addImgs(20).then(() => isLoading = false);
       console.log(pixels);
       last -= 750;
     }
   }
+
+	// if we've reached the end and we can't load more content
+	if(noMore && document.documentElement.scrollHeight - innerHeight - document.documentElement.scrollTop < 400){
+		thatsIt.open();
+	}
 }
 
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
-    // User is signed in.
+    // User is signed in.thats-it
     var displayName = user.displayName;
     var email = user.email;
     var emailVerified = user.emailVerified;

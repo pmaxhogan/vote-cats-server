@@ -71,12 +71,13 @@ h1 {
   flex-grow: 0;
   max-width: 33%;
   padding: 1rem;
+  max-height: fit-content;
 }
 .mdc-card{
   margin-bottom: 2rem;
 }
 img{
-  max-width: 100%;
+  width: 100%;
 }
 .hidden{
   display: none;

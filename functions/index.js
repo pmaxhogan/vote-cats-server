@@ -12,8 +12,7 @@ admin.initializeApp();
 const db = admin.firestore();
 //const bucket = admin.storage().bucket();
 
-const basePath = process.env.BASEPATH || (process.env.NODE_ENV === "production" ? "images" : "") ||  "test_images";
-console.log(basePath);
+const basePath = "images";
 
 const imagesRef = db.collection(basePath);
 const metaRef = db.collection("meta");
@@ -121,7 +120,6 @@ app.get(base + "picts/get", (req, res) => {
 
 app.get(base + "picts/:id", (req, res) => {
 	imagesRef.doc(req.params.id).get().then(doc => {
-		console.log(doc);
 		if(!doc.exists) return res.status(404).end();
 		res.json(procImageData(doc.data()));
 	});

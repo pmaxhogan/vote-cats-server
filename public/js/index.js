@@ -62,20 +62,29 @@ const addImgs = num => {
 	    panel.classList.add("mdc-card");
 			panel.setAttribute("data-timestamp", pict.timeStamp);
 	    panel.innerHTML = `
-<!-- <h2>A cute cat</h2> -->
 <img class = "mdc-card__media" src = "${pict.url}"/>
 <div class="mdc-card__actions">
-  <button class="mdc-icon-button mdc-card__action mdc-card__action--icon"
-     aria-pressed="false"
-     aria-label="Add to favorites"
-     title="Add to favorites">
-   <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
-   <i class="material-icons mdc-icon-button__icon">favorite_border</i>
-  </button>
+		<button id="add-to-favorites"
+	   class="mdc-icon-button mdc-card__action mdc-card__action--icon"
+	   aria-label="Add to favorites"
+	   aria-hidden="true"
+	   aria-pressed="false">
+	   <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
+	   <i class="material-icons mdc-icon-button__icon">favorite_border</i>
+	</button>
   <button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
 </div>`;
+			// add the panel
 	    getShortestColumn().appendChild(panel);
-	    mdc.iconButton.MDCIconButtonToggle.attachTo(panel.querySelector("i"));
+
+			// initalize the button
+			const favButton = panel.querySelector("button");
+			(new mdc.ripple.MDCRipple(favButton)).unbounded = true;
+	    const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
+			favButton.addEventListener("MDCIconButtonToggle:change", e => {
+				console.log("fav pressed", e.detail.isOn, pict);
+			});
+
 			panel.querySelector(".delete").addEventListener("click", () => {
 				fetchWithAuth("/api/v1/admin/picts/delete/" + pict.timeStamp).then(() => {
 					panel.remove();

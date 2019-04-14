@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+		"start": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/firebasekeys/vote-cats.json node ."
   },
   "author": "programmer5000",
   "license": "AGPL-3.0",

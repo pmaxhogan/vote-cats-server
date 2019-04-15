@@ -62,7 +62,7 @@ const addImgs = num => {
 	    panel.classList.add("mdc-card");
 			panel.setAttribute("data-timestamp", pict.timeStamp);
 	    panel.innerHTML = `
-<img class = "mdc-card__media" src = "${pict.url}"/>
+<img class = "mdc-card__media" src = "${pict.dispUrl || decodeURIComponent(decodeURIComponent(pict.url.slice(77, -10)))}"/>
 <div class="mdc-card__actions">
 		<button id="add-to-favorites"
 	   class="mdc-icon-button mdc-card__action mdc-card__action--icon"

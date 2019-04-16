@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-		"start": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/firebasekeys/vote-cats.json node ."
+    "start": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/firebasekeys/vote-cats.json node ."
   },
   "author": "programmer5000",
   "license": "AGPL-3.0",
@@ -14,6 +14,7 @@
     "firebase-admin": "^7.2.0",
     "grpc": "^1.12.4",
     "node-fetch": "^1.7.3",
+    "sharp": "^0.22.0",
     "xml2js": "^0.4.19"
   }
 }

@@ -59,7 +59,8 @@ h1 {
   display: inline-block;
 }
 .masonry-layout {
-  margin-top: 1rem;
+	--gutter-size: 0.5rem;
+  margin-top: var(--gutter-size);
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -69,12 +70,11 @@ h1 {
   flex-basis: 33%;
   flex-direction: column;
   flex-grow: 0;
-  max-width: 33%;
-  padding: 1rem;
+  padding: var(--gutter-size);
   max-height: fit-content;
 }
 .mdc-card{
-  margin-bottom: 2rem;
+  margin-bottom: calc(var(--gutter-size) * 2);
 }
 img{
   width: 100%;

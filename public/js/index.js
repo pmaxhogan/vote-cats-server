@@ -165,7 +165,7 @@ document.querySelectorAll(".sign-in").forEach(button => button.onclick = () => {
 let currentColumns = 5;
 let pastColumns = currentColumns;
 // the width when a column is removed
-const widthBreakpoints = [400, 650, 875, 1100, 1200, 1350];
+const widthBreakpoints = [400, 675, 900, 1125, 1250, 1425];
 
 // calculate the amount of columns we will need given a display width
 const calcNumColumns = (width) => {

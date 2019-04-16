@@ -44,6 +44,45 @@ const getShortestColumn = () => {
 
 let lastTimeStamp;
 
+let imgs = [];
+
+const addPict = pict => {
+	const panel = document.createElement("div");
+	panel.classList.add("mdc-card");
+	panel.setAttribute("data-timestamp", pict.timeStamp);
+	panel.innerHTML = `
+<img class = "mdc-card__media mdc-card__primary-action" src = "${pict.dispUrl || decodeURIComponent(decodeURIComponent(pict.url.slice(77, -10)))}"/>
+<div class="mdc-card__actions">
+<button id="add-to-favorites"
+ class="mdc-icon-button mdc-card__action mdc-card__action--icon"
+ aria-label="Add to favorites"
+ aria-hidden="true"
+ aria-pressed="false">
+ <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
+ <i class="material-icons mdc-icon-button__icon">favorite_border</i>
+</button>
+<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
+</div>`;
+	// add the panel
+	getShortestColumn().appendChild(panel);
+
+	// initalize the button
+	const favButton = panel.querySelector("button");
+	(new mdc.ripple.MDCRipple(favButton)).unbounded = true;
+	const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
+	favButton.addEventListener("MDCIconButtonToggle:change", e => {
+		console.log("fav pressed", e.detail.isOn, pict);
+	});
+
+	panel.querySelector(".delete").addEventListener("click", () => {
+		fetchWithAuth("/api/v1/admin/picts/delete/" + pict.timeStamp).then(() => {
+			panel.remove();
+		}).catch(console.error);
+	});
+	// console.log("\t" + pict.timeStamp);
+	lastTimeStamp = new Date(pict.timeStamp);
+};
+
 const addImgs = num => {
 	let params = "";
 	if(lastTimeStamp){
@@ -57,43 +96,14 @@ const addImgs = num => {
 		else noMore = false;
 
 		data.forEach(pict=>pict.date = Date.parse(pict.timeStamp));
-		data.sort((a, b) => b.date - a.date).forEach(pict => {
-	    const panel = document.createElement("div");
-	    panel.classList.add("mdc-card");
-			panel.setAttribute("data-timestamp", pict.timeStamp);
-	    panel.innerHTML = `
-<img class = "mdc-card__media mdc-card__primary-action" src = "${pict.dispUrl || decodeURIComponent(decodeURIComponent(pict.url.slice(77, -10)))}"/>
-<div class="mdc-card__actions">
-		<button id="add-to-favorites"
-	   class="mdc-icon-button mdc-card__action mdc-card__action--icon"
-	   aria-label="Add to favorites"
-	   aria-hidden="true"
-	   aria-pressed="false">
-	   <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
-	   <i class="material-icons mdc-icon-button__icon">favorite_border</i>
-	</button>
-  <button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
-</div>`;
-			// add the panel
-	    getShortestColumn().appendChild(panel);
+		data = data.sort((a, b) => b.date - a.date);
 
-			// initalize the button
-			const favButton = panel.querySelector("button");
-			(new mdc.ripple.MDCRipple(favButton)).unbounded = true;
-	    const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
-			favButton.addEventListener("MDCIconButtonToggle:change", e => {
-				console.log("fav pressed", e.detail.isOn, pict);
-			});
 
-			panel.querySelector(".delete").addEventListener("click", () => {
-				fetchWithAuth("/api/v1/admin/picts/delete/" + pict.timeStamp).then(() => {
-					panel.remove();
-				}).catch(console.error);
-			});
-			// console.log("\t" + pict.timeStamp);
-			lastTimeStamp = new Date(pict.timeStamp);
-	  });
+		imgs = imgs.concat(data);
+		data.forEach(addPict);
 		// console.log(lastTimeStamp, num);
+	}).catch(() => {
+		isLoading = false;
 	});
 };
 
@@ -155,24 +165,40 @@ document.querySelectorAll(".sign-in").forEach(button => button.onclick = () => {
 let currentColumns = 5;
 let pastColumns = currentColumns;
 // the width when a column is removed
-const widthBreakpoints = [200, 400, 600, 800, 1000, 1200];
+const widthBreakpoints = [400, 650, 875, 1100, 1200, 1350];
 
 // calculate the amount of columns we will need given a display width
 const calcNumColumns = (width) => {
+	let num = 1;
 	widthBreakpoints.forEach((breakpoint, idx) => {
 		// if we're in the right range
-		if(width >= breakpoint && (width < widthBreakpoints[idx + 1]) || widthBreakpoints.length == idx + 1){
+		if(width >= breakpoint && (width < widthBreakpoints[idx + 1] || widthBreakpoints.length === idx + 1)){
 			// return the num
-			return idx + 1;
+			num = idx + 2;
 		}
 	});
+	return num;
 };
 
 const updateColumns = () => {
 	pastColumns = currentColumns;
 	currentColumns = calcNumColumns(innerWidth);
 	if(currentColumns !== pastColumns){
-		console.log("going from", currentColumns, "to", pastColumns);
+		console.log("going from", pastColumns, "to", currentColumns);
+		const parent = $(".masonry-layout");
+
+		// empty it
+		while (parent.hasChildNodes()) {
+	  	parent.removeChild(parent.lastChild);
+		}
+
+		for(let i = 0; i < currentColumns; i ++){
+			const div = document.createElement("div");
+			div.classList.add("masonry-layout-column");
+			parent.appendChild(div);
+		}
+
+		imgs.forEach(addPict);
 	}
 };
 

@@ -52,7 +52,7 @@ const addPict = pict => {
 	panel.setAttribute("data-timestamp", pict.timeStamp);
 	panel.innerHTML = `
 <img class = "mdc-card__media mdc-card__primary-action" src = "${pict.dispUrl || decodeURIComponent(decodeURIComponent(pict.url.slice(77, -10)))}"/>
-<div class="mdc-card__actions">
+<div class="mdc-card__actions mdc-card__actions--full-bleed">
 <button id="add-to-favorites"
  class="mdc-icon-button mdc-card__action mdc-card__action--icon"
  aria-label="Add to favorites"
@@ -204,4 +204,4 @@ const updateColumns = () => {
 
 onresize = () => updateColumns();
 updateColumns();
-addImgs(15);
+addImgs(7 * calcNumColumns(innerWidth));

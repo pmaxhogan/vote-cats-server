@@ -62,7 +62,7 @@ const addImgs = num => {
 	    panel.classList.add("mdc-card");
 			panel.setAttribute("data-timestamp", pict.timeStamp);
 	    panel.innerHTML = `
-<img class = "mdc-card__media" src = "${pict.dispUrl || decodeURIComponent(decodeURIComponent(pict.url.slice(77, -10)))}"/>
+<img class = "mdc-card__media mdc-card__primary-action" src = "${pict.dispUrl || decodeURIComponent(decodeURIComponent(pict.url.slice(77, -10)))}"/>
 <div class="mdc-card__actions">
 		<button id="add-to-favorites"
 	   class="mdc-icon-button mdc-card__action mdc-card__action--icon"
@@ -96,7 +96,6 @@ const addImgs = num => {
 		// console.log(lastTimeStamp, num);
 	});
 };
-addImgs(15);
 
 let last = 0;
 let isLoading = false;
@@ -152,3 +151,31 @@ document.querySelectorAll(".sign-in").forEach(button => button.onclick = () => {
   console.log(button);
   firebase.auth().signInWithPopup(new firebase.auth[button.dataset.authName + "AuthProvider"]());
 });
+
+let currentColumns = 5;
+let pastColumns = currentColumns;
+// the width when a column is removed
+const widthBreakpoints = [200, 400, 600, 800, 1000, 1200];
+
+// calculate the amount of columns we will need given a display width
+const calcNumColumns = (width) => {
+	widthBreakpoints.forEach((breakpoint, idx) => {
+		// if we're in the right range
+		if(width >= breakpoint && (width < widthBreakpoints[idx + 1]) || widthBreakpoints.length == idx + 1){
+			// return the num
+			return idx + 1;
+		}
+	});
+};
+
+const updateColumns = () => {
+	pastColumns = currentColumns;
+	currentColumns = calcNumColumns(innerWidth);
+	if(currentColumns !== pastColumns){
+		console.log("going from", currentColumns, "to", pastColumns);
+	}
+};
+
+onresize = () => updateColumns();
+updateColumns();
+addImgs(15);

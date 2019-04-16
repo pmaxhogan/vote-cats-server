@@ -36,6 +36,7 @@ const authenticate = (req, res, next) => {
     req.headers.authorization = "Bearer " + req.query.token;
   }
   if (!req.headers.authorization || !req.headers.authorization.startsWith("Bearer ")) {
+		console.log("no auth!");
     res.status(403).send("Unauthorized");
     return;
   }
@@ -45,11 +46,14 @@ const authenticate = (req, res, next) => {
     console.log(decodedIdToken);
     next();
   }).catch(error => {
+		console.log(error);
+		console.log("invalid token");
     res.status(403).send("Invalid Token");
   });
 };
 const authenticateAdmin = (req, res, next) => {
 	if(!req.user) {
+		console.log("no user");
 		res.status(403).send("Unauthorized");
 		return;
 	}
@@ -59,7 +63,7 @@ const authenticateAdmin = (req, res, next) => {
 		if(admins.includes(req.user.uid)){
 			next();
 		}else{
-			console.log(admins, req.user.id);
+			console.log("did not find admin", req.user.id, "in", admins);
 			res.status(403).send("Unauthorized");
 			return;
 		}

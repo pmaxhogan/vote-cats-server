@@ -24,11 +24,18 @@ class extends HTMLElement {
   }
 });
 
-const fetchWithAuth = async (url, options = {}) => {
-	const token = await firebase.auth().currentUser.getIdToken();
-	if(!options.headers) options.headers = {};
-	options.headers.authorization = "Bearer " + token;
-	return fetch(url, options);
+const fetchWithAuth = async (url, options = {}, allowNoAuth = true) => {
+	const currentUser = firebase.auth().currentUser;
+	if(currentUser){
+		const token = await currentUser.getIdToken();
+		if(!options.headers) options.headers = {};
+		options.headers.authorization = "Bearer " + token;
+		return fetch(url, options);
+	}else if(allowNoAuth){// if it's ok to make the request when signed out
+		return fetch(url, options);
+	}else{
+		throw new Error("Not signed in!");
+	}
 };
 
 const getRealHeightOfHighestColumn = () => {
@@ -71,13 +78,24 @@ const addPict = pict => {
 	(new mdc.ripple.MDCRipple(favButton)).unbounded = true;
 	const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
 	favButton.addEventListener("MDCIconButtonToggle:change", e => {
-		console.log("fav pressed", e.detail.isOn, pict);
+		fetchWithAuth(`/api/v1/picts/${pict.timeStamp}/favorite`, {
+			method: "PUT"
+		}).then(resp => {
+			// if the request failed
+			if(!resp.ok && resp.status !== 400){
+				// put the button back where  it was
+				mdcFavButton.on = !e.detail.isOn;
+			}
+		});
 	});
 
 	panel.querySelector(".delete").addEventListener("click", () => {
-		fetchWithAuth("/api/v1/admin/picts/delete/" + pict.timeStamp).then(() => {
-			panel.remove();
-		}).catch(console.error);
+		fetchWithAuth("/api/v1/admin/picts/delete/" + pict.timeStamp).then(resp => {
+			// if the request succeded, remove the panel
+			if(resp.ok){
+				panel.remove();
+			}
+		});
 	});
 	// console.log("\t" + pict.timeStamp);
 	lastTimeStamp = new Date(pict.timeStamp);

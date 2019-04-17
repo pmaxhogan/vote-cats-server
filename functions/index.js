@@ -18,9 +18,23 @@ const imagesRef = db.collection(basePath);
 const metaRef = db.collection("meta");
 const adminDoc = metaRef.doc("admins");
 
+let admins = [];
+
+adminDoc.get().then(doc => {
+	const data = doc.data();
+	admins = data.adminIds;
+});
+
+// returns true if the provided User object is an admin
+const checkIfAdmin = user => admins.includes(user.uid);
+
 // fixes the timestamp of an image.
-const procImageData = (data)=>{
+const procImageData = (data, user)=>{
+	console.log("user", user);
 	data.timeStamp = data.timeStamp.toDate();
+	if(user) data.iVoted = data.usersVoted.includes(user.uid);
+	// if you're not an admin, don't tell you who voted for who
+	if(!user || !checkIfAdmin(user)) delete data.usersVoted;
 	return data;
 };
 
@@ -31,14 +45,19 @@ const noCache = (req, res, next) => {
 
 // app.use(noCache);
 
+// hard-fails if authentication is not present
 const authenticate = (req, res, next) => {
+  if(!req.user) res.status(403).send("Invalid Token");
+	next();
+};
+
+// determines if the user attempted to authenticate and validates them if so
+const softAuthenticate = (req, res, next) => {
   if(req.query.token){
     req.headers.authorization = "Bearer " + req.query.token;
   }
   if (!req.headers.authorization || !req.headers.authorization.startsWith("Bearer ")) {
-		console.log("no auth!");
-    res.status(403).send("Unauthorized");
-    return;
+    return next();
   }
   const idToken = req.headers.authorization.split("Bearer ")[1];
   admin.auth().verifyIdToken(idToken).then(decodedIdToken => {
@@ -46,11 +65,13 @@ const authenticate = (req, res, next) => {
     console.log(decodedIdToken);
     next();
   }).catch(error => {
-		console.log(error);
-		console.log("invalid token");
+		console.error("invalid token");
     res.status(403).send("Invalid Token");
   });
 };
+
+app.use(softAuthenticate);
+
 const authenticateAdmin = (req, res, next) => {
 	if(!req.user) {
 		console.log("no user");
@@ -59,8 +80,8 @@ const authenticateAdmin = (req, res, next) => {
 	}
 	adminDoc.get().then(doc => {
 		const data = doc.data();
-		const admins = data.adminIds;
-		if(admins.includes(req.user.uid)){
+		admins = data.adminIds;
+		if(checkIfAdmin(req.user)){
 			next();
 		}else{
 			console.log("did not find admin", req.user.id, "in", admins);
@@ -115,17 +136,24 @@ app.get(base + "picts/get", (req, res) => {
   then(snapshot => {
     const data = [];
     snapshot.forEach(doc => {
-			data.push(procImageData(doc.data()));
+			data.push(procImageData(doc.data(), req.user));
       data[doc.id] = doc.data();
     });
     res.json(data);
   });
 });
 
+app.get(base + "picts/getalot", (req, res) => {
+	if(!Array.isArray(req.query.ids)){
+		return res.status(400).send("Invalid param");
+	}
+
+});
+
 app.get(base + "picts/:id", (req, res) => {
 	imagesRef.doc(req.params.id).get().then(doc => {
 		if(!doc.exists) return res.status(404).end();
-		res.json(procImageData(doc.data()));
+		res.json(procImageData(doc.data(), req.user));
 	});
 });
 
@@ -134,7 +162,6 @@ app.use([base + "picts/:id/favorite", base + "picts/:id/unfavorite"], authentica
 const getFavorite = isFavorite => (req, res) => {
 	const image = imagesRef.doc(req.params.id);
 	image.get().then(doc => {
-		console.log(doc);
 		if(!doc.exists) return res.status(404).end();
 		const data = doc.data();
 

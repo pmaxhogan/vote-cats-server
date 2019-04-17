@@ -24,7 +24,7 @@ class extends HTMLElement {
   }
 });
 
-const fetchWithAuth = async (url, options = {}, allowNoAuth = true) => {
+const fetchIt = async (url, options = {}, allowNoAuth = true) => {
 	const currentUser = firebase.auth().currentUser;
 	if(currentUser){
 		const token = await currentUser.getIdToken();
@@ -108,7 +108,7 @@ const addImgs = num => {
 	}
 	const url = "/api/v1/picts/get?limit=" + num + params;
 	console.log(url);
-  return fetch(url).then(x=>x.json()).then(data => {
+  return fetchIt(url).then(x=>x.json()).then(data => {
 		// if we didn't get anything, tell the user
 		if(!data.length) noMore = true;
 		else noMore = false;
@@ -145,7 +145,12 @@ onscroll = e => {
 	}
 }
 
+let hasLoaded = false;
 firebase.auth().onAuthStateChanged(function(user) {
+	if(!hasLoaded) addImgs(7 * calcNumColumns(innerWidth));
+	else {
+		imgs.forEach();
+	}
   if (user) {
     // User is signed in.thats-it
     var displayName = user.displayName;
@@ -172,6 +177,7 @@ firebase.auth().onAuthStateChanged(function(user) {
     $("#signed-out").classList.remove("hidden")
     $("#signed-in").classList.add("hidden");
   }
+	hasLoaded = true;
 });
 
 $("button#sign-out").onclick = () => firebase.auth().signOut();
@@ -222,4 +228,3 @@ const updateColumns = () => {
 
 onresize = () => updateColumns();
 updateColumns();
-addImgs(7 * calcNumColumns(innerWidth));

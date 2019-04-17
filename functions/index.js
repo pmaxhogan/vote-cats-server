@@ -4,6 +4,8 @@ const admin = require("firebase-admin");
 const express = require("express");
 const app = express();
 
+app.disable("x-powered-by");
+
 const base = "/api/v1/";
 
 // Initialize the app with a service account, granting admin privileges
@@ -16,6 +18,7 @@ const basePath = "images";
 
 const imagesRef = db.collection(basePath);
 const metaRef = db.collection("meta");
+const usersRef = db.collection("users");
 const adminDoc = metaRef.doc("admins");
 
 let admins = [];
@@ -148,6 +151,16 @@ app.get(base + "picts/getalot", (req, res) => {
 		return res.status(400).send("Invalid param");
 	}
 
+	db.getAll(req.query.ids.map(id => imagesRef.doc(id))).then(snapshot => {
+    const data = [];
+    snapshot.forEach(doc => {
+			data.push(procImageData(doc.data(), req.user));
+      data[doc.id] = doc.data();
+    });
+    res.json(data);
+  }).catch(e => {
+		return res.status(400).send("Invalid id");
+	});
 });
 
 app.get(base + "picts/:id", (req, res) => {
@@ -159,22 +172,42 @@ app.get(base + "picts/:id", (req, res) => {
 
 app.use([base + "picts/:id/favorite", base + "picts/:id/unfavorite"], authenticate);
 
+// a curried function that returns a function for handleing either favoriting or unfavoriting
 const getFavorite = isFavorite => (req, res) => {
-	const image = imagesRef.doc(req.params.id);
-	image.get().then(doc => {
-		if(!doc.exists) return res.status(404).end();
-		const data = doc.data();
+	usersRef.doc(req.user.uid).get().then(async doc => {
+		let data;
 
-		// short version of ensuring that you can't favorite something already favorited and the reverse also
-		if(isFavorite === data.usersVoted.includes(req.user.uid)) return res.status(400).end();
+		// get the data if it exists
+		if(doc.exists) doc.data();
+		else data = data = {};
+
+		// ensures that you can't favorite something already favorited and the reverse also
+		if(data && data.likes && isFavorite === data.likes.includes(req.params.id)) return res.status(400).end();
+
+		if(isFavorite){
+			// append to
+			if(data.likes) data.likes.push(req.params.id);
+			else data.likes = [req.params.id];
+			await usersRef.doc(req.user.uid).set(data);
+		}
+
+
+
+		const image = imagesRef.doc(req.params.id);
+		const imageDoc = await image.get();
+		if(!imageDoc.exists) return res.status(404).end();
+		const imageData = imageDoc.data();
+
+
+
 		const newData = {
-			numUsersVoted: data.numUsersVoted + (isFavorite ? 1 : -1),
-			usersVoted: (isFavorite ?
-				data.usersVoted.concat(req.user.uid) :
-				data.usersVoted.filter(user => user !== req.user.uid)
-			)
+			numUsersVoted: data.numUsersVoted + (isFavorite ? 1 : -1)
 		};
-		image.update(newData).then(() => res.json(Object.assign(data, newData)));
+		await image.update(newData);
+		res.json(Object.assign(imageData, newData));
+	}).catch(e => {
+		console.error(e);
+		res.status(400).end();
 	});
 };
 

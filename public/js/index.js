@@ -52,6 +52,17 @@ const getShortestColumn = () => {
 let lastTimeStamp;
 
 let imgs = [];
+let myLikes = [];
+
+const updateLikes = () => {
+	document.querySelectorAll("[data-timestamp]").forEach(x=>x.mdcFavButton.on = false);
+	myLikes.forEach(like => {
+		const card = $(`[data-timestamp="${likedImageId}"]`);
+		if(card){
+			card.mdcFavButton.on = true;
+		}
+	});
+};
 
 const addPict = pict => {
 	const panel = document.createElement("div");
@@ -77,8 +88,10 @@ const addPict = pict => {
 	const favButton = panel.querySelector("button");
 	(new mdc.ripple.MDCRipple(favButton)).unbounded = true;
 	const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
+	panel.mdcFavButton = mdcFavButton;
+
 	favButton.addEventListener("MDCIconButtonToggle:change", e => {
-		fetchWithAuth(`/api/v1/picts/${pict.timeStamp}/favorite`, {
+		fetchIt(`/api/v1/picts/${pict.timeStamp}/favorite`, {
 			method: "PUT"
 		}).then(resp => {
 			// if the request failed
@@ -90,7 +103,7 @@ const addPict = pict => {
 	});
 
 	panel.querySelector(".delete").addEventListener("click", () => {
-		fetchWithAuth("/api/v1/admin/picts/delete/" + pict.timeStamp).then(resp => {
+		fetchIt("/api/v1/admin/picts/delete/" + pict.timeStamp).then(resp => {
 			// if the request succeded, remove the panel
 			if(resp.ok){
 				panel.remove();
@@ -99,6 +112,7 @@ const addPict = pict => {
 	});
 	// console.log("\t" + pict.timeStamp);
 	lastTimeStamp = new Date(pict.timeStamp);
+	updateLikes();
 };
 
 const addImgs = num => {
@@ -148,10 +162,14 @@ onscroll = e => {
 let hasLoaded = false;
 firebase.auth().onAuthStateChanged(function(user) {
 	if(!hasLoaded) addImgs(7 * calcNumColumns(innerWidth));
-	else {
-		imgs.forEach();
-	}
   if (user) {
+		fetchIt("/api/v1/mylikes").then(x=>{
+			if(x.ok) return x.text();
+			throw new Error(x.statusText);
+		}).then(likes => {
+			myLikes = likes;
+			updateLikes();
+		});
     // User is signed in.thats-it
     var displayName = user.displayName;
     var email = user.email;

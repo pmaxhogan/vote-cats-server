@@ -69,7 +69,7 @@ const addPict = pict => {
 	panel.classList.add("mdc-card");
 	panel.setAttribute("data-timestamp", pict.timeStamp);
 	panel.innerHTML = `
-<img class = "mdc-card__media mdc-card__primary-action" src = "${pict.dispUrl || decodeURIComponent(decodeURIComponent(pict.url.slice(77, -10)))}"/>
+<img class = "mdc-card__media mdc-card__primary-action" src = "${pict.dispUrl || pict.url}"/>
 <div class="mdc-card__actions mdc-card__actions--full-bleed">
 <button id="add-to-favorites"
  class="mdc-icon-button mdc-card__action mdc-card__action--icon"

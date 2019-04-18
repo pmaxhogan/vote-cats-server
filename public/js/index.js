@@ -57,7 +57,7 @@ let myLikes = [];
 const updateLikes = () => {
 	document.querySelectorAll("[data-timestamp]").forEach(x=>x.mdcFavButton.on = false);
 	myLikes.forEach(like => {
-		const card = $(`[data-timestamp="${likedImageId}"]`);
+		const card = $(`[data-timestamp="${like}"]`);
 		if(card){
 			card.mdcFavButton.on = true;
 		}
@@ -91,7 +91,7 @@ const addPict = pict => {
 	panel.mdcFavButton = mdcFavButton;
 
 	favButton.addEventListener("MDCIconButtonToggle:change", e => {
-		fetchIt(`/api/v1/picts/${pict.timeStamp}/favorite`, {
+		fetchIt(`/api/v1/picts/${pict.timeStamp}/${e.detail.isOn ? "" : "un"}favorite`, {
 			method: "PUT"
 		}).then(resp => {
 			// if the request failed
@@ -164,7 +164,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 	if(!hasLoaded) addImgs(7 * calcNumColumns(innerWidth));
   if (user) {
 		fetchIt("/api/v1/mylikes").then(x=>{
-			if(x.ok) return x.text();
+			if(x.ok) return x.json();
 			throw new Error(x.statusText);
 		}).then(likes => {
 			myLikes = likes;

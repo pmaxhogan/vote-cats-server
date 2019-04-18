@@ -100,7 +100,14 @@ app.get(base, (req, res) => {
   res.send("Hello, World!");
 });
 
+app.use(base + "mylikes/", authenticate);
+app.get(base + "mylikes/", (req, res) => {
+	usersRef.doc(req.user.uid).get().then(doc => {
+		const data = doc.data();
 
+		res.json(data.likes);
+	});
+});
 app.use(base + "admin/", authenticate);
 app.use(base + "admin/", authenticateAdmin);
 app.get(base + "admin/picts/delete/:id", (req, res) => {
@@ -174,37 +181,39 @@ app.use([base + "picts/:id/favorite", base + "picts/:id/unfavorite"], authentica
 
 // a curried function that returns a function for handleing either favoriting or unfavoriting
 const getFavorite = isFavorite => (req, res) => {
-	usersRef.doc(req.user.uid).get().then(async doc => {
-		let data;
-
-		// get the data if it exists
-		if(doc.exists) doc.data();
-		else data = data = {};
+	usersRef.doc(req.user.uid).get().then(doc => {
+		const data = doc.data();
 
 		// ensures that you can't favorite something already favorited and the reverse also
+		console.log("data.likes", data.likes, "isFavorite", isFavorite, "data.likes.includes(req.params.id)", data.likes.includes(req.params.id));
 		if(data && data.likes && isFavorite === data.likes.includes(req.params.id)) return res.status(400).end();
 
 		if(isFavorite){
 			// append to
 			if(data.likes) data.likes.push(req.params.id);
 			else data.likes = [req.params.id];
-			await usersRef.doc(req.user.uid).set(data);
+			usersRef.doc(req.user.uid).set(data);
+		}else{
+			isFavorite
+			const index = data.likes.indexOf(req.params.id);
+			if(index > -1){
+			  data.likes.splice(index, 1);
+				usersRef.doc(req.user.uid).set(data);
+			}
 		}
 
 
 
 		const image = imagesRef.doc(req.params.id);
-		const imageDoc = await image.get();
-		if(!imageDoc.exists) return res.status(404).end();
-		const imageData = imageDoc.data();
+		image.get().then(imageDoc => {
+			if(!imageDoc.exists) return res.status(404).end();
+			const imageData = imageDoc.data();
+			const newData = {
+				numUsersVoted: (imageData.numUsersVoted || 0) + (isFavorite ? 1 : -1)
+			};
 
-
-
-		const newData = {
-			numUsersVoted: data.numUsersVoted + (isFavorite ? 1 : -1)
-		};
-		await image.update(newData);
-		res.json(Object.assign(imageData, newData));
+			image.update(newData).then(() => res.json(Object.assign(imageData, newData)));
+		});
 	}).catch(e => {
 		console.error(e);
 		res.status(400).end();
@@ -215,3 +224,16 @@ app.put(base + "picts/:id/favorite", getFavorite(true));
 app.put(base + "picts/:id/unfavorite", getFavorite(false));
 
 exports.cats = functions.https.onRequest(app);
+
+
+exports.setUserFirestore = functions.auth.user().onCreate((user, context) => {
+	usersRef.doc(user.uid).get().then(doc => {
+		let data;
+
+		// get the data if it exists
+		if(doc.exists) data = doc.data();
+		else data = {};
+
+		usersRef.doc(user.uid).set(data);
+	});
+});

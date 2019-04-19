@@ -5,6 +5,15 @@ scrollTo(0, 0);
 
 const $ = selector => document.querySelector(selector);
 
+
+const dialog = new mdc.dialog.MDCDialog($("#sign-in-modal"));
+dialog.listen("MDCDialog:closed", e => {
+	if(e.detail.action === "accept"){
+		firebase.auth().signInWithPopup(new firebase.auth["GoogleAuthProvider"]());
+	}
+});
+
+
 // if if we've ran out of content
 let noMore = false;
 // the snackbar to tell us we've ran out of content
@@ -90,11 +99,15 @@ const addPict = pict => {
 	const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
 	panel.mdcFavButton = mdcFavButton;
 
+	// when the button is cliked
 	favButton.addEventListener("MDCIconButtonToggle:change", e => {
 		fetchIt(`/api/v1/picts/${pict.timeStamp}/${e.detail.isOn ? "" : "un"}favorite`, {
 			method: "PUT"
 		}).then(resp => {
 			// if the request failed
+			if(resp.status === 403){// if you're not signed in
+				dialog.open();
+			}
 			if(!resp.ok && resp.status !== 400){
 				// put the button back where  it was
 				mdcFavButton.on = !e.detail.isOn;
@@ -200,7 +213,6 @@ firebase.auth().onAuthStateChanged(function(user) {
 
 $("button#sign-out").onclick = () => firebase.auth().signOut();
 document.querySelectorAll(".sign-in").forEach(button => button.onclick = () => {
-  console.log(button);
   firebase.auth().signInWithPopup(new firebase.auth[button.dataset.authName + "AuthProvider"]());
 });
 

@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
 const fetch = require("node-fetch");
+const sharp = require("sharp");
 const {parseString} = require("xml2js");
 
 
@@ -46,7 +47,7 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 	  const URL = image.url[0];
 		const source = image.source_url[0];
 		console.log("getting", URL);
-		fetch(URL).then(res => res.buffer()).then(buffer => {
+		fetch(URL).then(res => {
 			console.log("uploading");
 		  var options = {
 		    destination: basePath + "/" + encodeURIComponent(URL),
@@ -61,7 +62,8 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 		  	}
 			});
 
-			stream.end(buffer);
+			res.body.pipe(sharp().resize(350).jpeg()).pipe(stream);// streams ftw
+
 			stream.on("error", console.error);
 		  stream.on("finish", () => {
 				const uploadedUrl = getPublicUrl(basePath + "/" + encodeURIComponent(URL));
@@ -72,9 +74,10 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 	      img.timeStamp = new Date();
 				img.source = source;
 				img.num = i;
+				img.redirUrl = res.url;
 	      i++;
 	      console.log("added img", img, "num", i);
-	      addDoc(img);
+	      addDoc(img).then(() => i > 5 && process.exit());
 			});
 		});
   });
@@ -88,7 +91,7 @@ imagesRef.get().then(snapshot => {
     //console.log(doc.id, "=>", doc.data());
     images[doc.id] = data;
   });
-	i = maxId;
+	i = maxId || 0;
 
   newImg();
 

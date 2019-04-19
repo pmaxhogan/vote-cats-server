@@ -125,3 +125,11 @@ i.mdc-icon-toggle.material-icons{
 img.mdc-card__media {
 	background: var(--mdc-theme-background);
 }
+
+.delete{
+	display: none;
+}
+
+body.admin .delete{
+	display: unset;
+}

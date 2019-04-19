@@ -58,6 +58,20 @@ const getShortestColumn = () => {
   return Array.from(columns).sort((a, b) => a.offsetHeight - b.offsetHeight)[0];
 };
 
+const disableAdmin = () => document.body.classList.remove("admin");
+const enableAdmin = () => document.body.classList.add("admin");
+
+disableAdmin();
+
+const updateAdmin = () => {
+	disableAdmin();
+	fetchIt("/api/v1/admin/test").then(res => {
+		if(res.ok){
+			enableAdmin();
+		}
+	});
+};
+
 let lastTimeStamp;
 
 let imgs = [];
@@ -202,11 +216,13 @@ firebase.auth().onAuthStateChanged(function(user) {
 
     const img = $("#profile").querySelector("img");
     img.src = user.photoURL;
+		updateAdmin();
   } else {
     // User is signed out.
     console.log("SIGNED OUT");
     $("#signed-out").classList.remove("hidden")
     $("#signed-in").classList.add("hidden");
+		disableAdmin();
   }
 	hasLoaded = true;
 });

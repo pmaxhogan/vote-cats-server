@@ -109,6 +109,9 @@ app.get(base + "mylikes/", (req, res) => {
 });
 app.use(base + "admin/", authenticate);
 app.use(base + "admin/", authenticateAdmin);
+
+app.get(base + "admin/test", (_, res) => res.end());
+
 app.get(base + "admin/picts/delete/:id", (req, res) => {
 	console.log("Deleting picture", req.params.id);
 	imagesRef.doc(req.params.id).delete().then(()=>{

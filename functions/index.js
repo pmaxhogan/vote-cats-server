@@ -33,7 +33,6 @@ const checkIfAdmin = user => admins.includes(user.uid);
 
 // fixes the timestamp of an image.
 const procImageData = (data, user)=>{
-	console.log("user", user);
 	data.timeStamp = data.timeStamp.toDate();
 	if(user) data.iVoted = data.usersVoted.includes(user.uid);
 	// if you're not an admin, don't tell you who voted for who
@@ -65,7 +64,6 @@ const softAuthenticate = (req, res, next) => {
   const idToken = req.headers.authorization.split("Bearer ")[1];
   admin.auth().verifyIdToken(idToken).then(decodedIdToken => {
     req.user = decodedIdToken;
-    console.log(decodedIdToken);
     next();
   }).catch(error => {
 		console.error("invalid token");
@@ -77,7 +75,7 @@ app.use(softAuthenticate);
 
 const authenticateAdmin = (req, res, next) => {
 	if(!req.user) {
-		console.log("no user");
+		console.log("Admin authentication failed (no user)");
 		res.status(403).send("Unauthorized");
 		return;
 	}
@@ -105,7 +103,8 @@ app.get(base + "mylikes/", (req, res) => {
 	usersRef.doc(req.user.uid).get().then(doc => {
 		const data = doc.data();
 
-		res.json(data.likes);
+		res.json(data && data.likes || []);
+		if(!doc.exists) usersRef.doc(req.user.uid).set({});
 	});
 });
 app.use(base + "admin/", authenticate);
@@ -135,7 +134,6 @@ app.get(base + "picts/get", (req, res) => {
       return res.status(400).json({"error": "Invalid limit query parameter. It should be an integer"});
     }
   }
-	console.log("startAfter", startAfter, req.query.startAfter, "limit", limit, req.query.limit);
 
 	let prom = imagesRef.
 	orderBy("timeStamp", "desc").
@@ -183,9 +181,9 @@ app.use([base + "picts/:id/favorite", base + "picts/:id/unfavorite"], authentica
 const getFavorite = isFavorite => (req, res) => {
 	usersRef.doc(req.user.uid).get().then(doc => {
 		const data = doc.data();
+		data.likes = data.likes || [];
 
 		// ensures that you can't favorite something already favorited and the reverse also
-		console.log("data.likes", data.likes, "isFavorite", isFavorite, "data.likes.includes(req.params.id)", data.likes.includes(req.params.id));
 		if(data && data.likes && isFavorite === data.likes.includes(req.params.id)) return res.status(400).end();
 
 		if(isFavorite){

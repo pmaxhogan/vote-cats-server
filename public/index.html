@@ -1,96 +1,113 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Vote Cats</title>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>Vote Cats</title>
 
-    <!-- <link rel="preconnect" href="https://cors-anywhere.herokuapp.com/">
-    <link rel="preconnect" href="https://thecatapi.com/"> -->
-    <link rel="stylesheet" href="node_modules/material-components-web/dist/material-components-web.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href = "/css/index.css">
+	<!-- <link rel="preconnect" href="https://cors-anywhere.herokuapp.com/">
+	<link rel="preconnect" href="https://thecatapi.com/"> -->
+	<link rel="stylesheet" href="node_modules/material-components-web/dist/material-components-web.min.css">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link rel="stylesheet" href = "/css/index.css">
 
 
-  </head>
-  <body class="mdc-typography mdc-theme--background">
-		<header class="mdc-top-app-bar mdc-top-app-bar--fixed">
-		  <div class="mdc-top-app-bar__row">
-		    <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-		      <a href="#" class="material-icons mdc-top-app-bar__navigation-icon">menu</a>
-		      <span class="mdc-top-app-bar__title">Vote Cats</span>
-		    </section>
-		    <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
-					<div id = "signed-out" class = "hidden">
- 					 <h2 id = "sign-in-with" class="mdc-typography--subheading2">Sign in or sign up with</h2>
- 					 <button class = "sign-in mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple" data-auth-name = "Google"><img src="/img/google_logo.png" class = "logo-button"></button>
- 				 </div>
+</head>
+<body class="mdc-typography mdc-theme--background">
+	<header class="mdc-top-app-bar mdc-top-app-bar--fixed">
+		<div class="mdc-top-app-bar__row">
+			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+				<a href="#" class="material-icons mdc-top-app-bar__navigation-icon">menu</a>
+				<span class="mdc-top-app-bar__title">Vote Cats</span>
+			</section>
+			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
+				<div id = "signed-out" class = "hidden">
+					<h2 id = "sign-in-with" class="mdc-typography--subheading2">Sign in or sign up with</h2>
+					<button class = "sign-in mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple" data-auth-name = "Google"><img src="/img/google_logo.png" class = "logo-button"></button>
+				</div>
 
- 				 <div id = "signed-in" class = "hidden">
- 					 <button id = "profile" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><span>Unknown</span><img class="logo-button" src="/"></button>
- 					 <button id = "sign-out" class = "mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple">Sign out</button>
- 				 </div>
-		    </section>
-		  </div>
-		</header>
-
-    <div class="masonry-layout mdc-top-app-bar--prominent-fixed-adjust">
-      <div class="masonry-layout-column">
-      </div>
-      <div class="masonry-layout-column">
-      </div>
-      <div class="masonry-layout-column">
-      </div>
-    </div>
-
-		<div class="mdc-snackbar thats-it">
-		  <div class="mdc-snackbar__surface">
-		    <div class="mdc-snackbar__label" role="status" aria-live="polite">That's it.</div>
-		  </div>
+				<div id = "signed-in" class = "hidden">
+					<div class="mdc-menu-surface--anchor">
+						<button id = "profile" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><span>Unknown</span><img class="logo-button" src="/"></button>
+						<div id = "settings" class="mdc-menu mdc-menu-surface" tabindex="-1">
+							<ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical">
+								<li class="mdc-list-item" role="menuitem">
+									<div class="mdc-switch form-field" id = "dark-theme">
+									  <div class="mdc-switch__track"></div>
+									  <div class="mdc-switch__thumb-underlay">
+									    <div class="mdc-switch__thumb">
+									        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch">
+									    </div>
+									  </div>
+									</div>
+									<label for="basic-switch">Dark theme</label>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<button id = "sign-out" class = "mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple">Sign out</button>
+				</div>
+			</section>
 		</div>
+	</header>
 
-		<div id = "sign-in-modal" class="mdc-dialog"
-	     role="alertdialog"
-	     aria-modal="true"
-	     aria-labelledby="fav-dialog-title">
-	  	<div class="mdc-dialog__container">
-		    <div class="mdc-dialog__surface">
-		      <!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
-		      <h2 class="mdc-dialog__title" id="fav-dialog-title"><!--
-		     -->You need to be signed in to favorite a picture.<!--
-		   --></h2>
-		      <footer class="mdc-dialog__actions">
-		      <button tabindex = "1" type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close">
-		        <span class="mdc-button__label">Cancel</span>
-		      </button>
-		      <button tabindex = "0" type="button" class="mdc-button mdc-dialog__button mdc-dialog__button--default mdc-button--raised mdc-dialog__button--default" data-mdc-dialog-action="accept">
-		        <span class="mdc-button__label">Sign in with Google</span>
-		      </button>
-		    </footer>
-		  </div>
-		  <div class="mdc-dialog__scrim"></div>
+	<div class="masonry-layout mdc-top-app-bar--prominent-fixed-adjust">
+		<div class="masonry-layout-column">
 		</div>
+		<div class="masonry-layout-column">
+		</div>
+		<div class="masonry-layout-column">
+		</div>
+	</div>
 
-    <!-- Templates -->
-    <template id = "panel-template">
-      <div class="masonry-layout-panel">
-        <!-- <h2>A cute cat</h2> -->
-        <slot name = "img">The image could not be loaded.</slot>
-        <p class = "mdc-card__supporting-text">
-          From <slot name = "src">
-          <a href = "https://thecatapi.com">The Cat API</a>
-          </slot>. <button class = "delete">Delete</button>
-        </p>
-      </div>
-    </template>
-    <script src="/__/firebase/4.7.0/firebase-app.js"></script>
-    <script src="/__/firebase/4.7.0/firebase-auth.js"></script>
-    <!-- <script defer src="/__/firebase/4.7.0/firebase-database.js"></script>
-    <script defer src="/__/firebase/4.7.0/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/4.7.0/firebase-storage.js"></script> -->
-    <!-- initialize the SDK after all desired features are loaded -->
-    <script src="/__/firebase/init.js"></script>
-    <script src="node_modules/material-components-web/dist/material-components-web.js"></script>
-    <script src = "/js/index.js"></script>
-  </body>
+	<div class="mdc-snackbar thats-it">
+		<div class="mdc-snackbar__surface">
+			<div class="mdc-snackbar__label" role="status" aria-live="polite">That's it.</div>
+		</div>
+	</div>
+
+	<div id = "sign-in-modal" class="mdc-dialog"
+	role="alertdialog"
+	aria-modal="true"
+	aria-labelledby="fav-dialog-title">
+	<div class="mdc-dialog__container">
+		<div class="mdc-dialog__surface">
+			<!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
+			<h2 class="mdc-dialog__title" id="fav-dialog-title"><!--
+			-->You need to be signed in to favorite a picture.<!--
+		--></h2>
+		<footer class="mdc-dialog__actions">
+			<button tabindex = "1" type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close">
+				<span class="mdc-button__label">Cancel</span>
+			</button>
+			<button tabindex = "0" type="button" class="mdc-button mdc-dialog__button mdc-dialog__button--default mdc-button--raised mdc-dialog__button--default" data-mdc-dialog-action="accept">
+				<span class="mdc-button__label">Sign in with Google</span>
+			</button>
+		</footer>
+	</div>
+	<div class="mdc-dialog__scrim"></div>
+</div>
+
+<!-- Templates -->
+<template id = "panel-template">
+	<div class="masonry-layout-panel">
+		<!-- <h2>A cute cat</h2> -->
+		<slot name = "img">The image could not be loaded.</slot>
+		<p class = "mdc-card__supporting-text">
+			From <slot name = "src">
+				<a href = "https://thecatapi.com">The Cat API</a>
+			</slot>. <button class = "delete">Delete</button>
+		</p>
+	</div>
+</template>
+<script src="/__/firebase/4.7.0/firebase-app.js"></script>
+<script src="/__/firebase/4.7.0/firebase-auth.js"></script>
+<!-- <script defer src="/__/firebase/4.7.0/firebase-database.js"></script>
+<script defer src="/__/firebase/4.7.0/firebase-messaging.js"></script>
+<script defer src="/__/firebase/4.7.0/firebase-storage.js"></script> -->
+<!-- initialize the SDK after all desired features are loaded -->
+<script src="/__/firebase/init.js"></script>
+<script src="node_modules/material-components-web/dist/material-components-web.js"></script>
+<script src = "/js/index.js"></script>
+</body>
 </html>

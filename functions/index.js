@@ -5,6 +5,14 @@ const express = require("express");
 const app = express();
 
 app.disable("x-powered-by");
+app.use(express.json({
+  inflate: true,
+  limit: "100kb",
+  reviver: null,
+  strict: true,
+  type: "application/json",
+  verify: undefined
+}))
 
 const base = "/api/v1/";
 
@@ -35,7 +43,7 @@ const checkIfAdmin = user => admins.includes(user.uid);
 const procImageData = (data, user)=>{
 	data.timeStamp = data.timeStamp.toDate();
 	if(user) data.iVoted = data.usersVoted.includes(user.uid);
-	// if you're not an admin, don't tell you who voted for who
+	// if you"re not an admin, don"t tell you who voted for who
 	if(!user || !checkIfAdmin(user)) delete data.usersVoted;
 	return data;
 };
@@ -92,6 +100,7 @@ const authenticateAdmin = (req, res, next) => {
 	});
 };
 
+app.use(base + "auth/", authenticate);
 app.get(base + "auth", (req, res) => res.send("Auth successful."));
 
 app.get(base, (req, res) => {
@@ -178,7 +187,27 @@ app.get(base + "picts/:id", (req, res) => {
 	});
 });
 
-app.use([base + "picts/:id/favorite", base + "picts/:id/unfavorite"], authenticate);
+app.get(base + "auth", (req, res) => res.send("Auth successful."));
+
+app.patch(base + "auth/profile", (req, res) => {
+	try{
+		if(!req.body) return req.status(400).end();
+		const data = JSON.parse(req.body);
+		console.log(data, typeof data);
+		usersRef.doc(req.user.uid).update(data);
+		res.end();
+	}catch(e){
+		console.error(e);
+		return res.status(400).end();
+	}
+});
+app.get(base + "auth/profile", (req, res) => {
+	usersRef.doc(req.user.uid).get().then(doc => {
+		const data = doc.data();
+		console.log(data);
+		res.json(data);
+	});
+});
 
 // a curried function that returns a function for handleing either favoriting or unfavoriting
 const getFavorite = isFavorite => (req, res) => {
@@ -186,7 +215,7 @@ const getFavorite = isFavorite => (req, res) => {
 		const data = doc.data();
 		data.likes = data.likes || [];
 
-		// ensures that you can't favorite something already favorited and the reverse also
+		// ensures that you can"t favorite something already favorited and the reverse also
 		if(data && data.likes && isFavorite === data.likes.includes(req.params.id)) return res.status(400).end();
 
 		if(isFavorite){

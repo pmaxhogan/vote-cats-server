@@ -199,6 +199,13 @@ firebase.auth().onAuthStateChanged(function(user) {
 			myLikes = likes;
 			updateLikes();
 		});
+
+		fetchIt("/api/v1/auth/profile").then(x=>x.json()).then(data => {
+			updateDarkTheme(data.darkTheme || false);
+			darkTheme.checked = data.darkTheme;
+		});
+
+
     // User is signed in.thats-it
     var displayName = user.displayName;
     var email = user.email;
@@ -228,6 +235,23 @@ firebase.auth().onAuthStateChanged(function(user) {
   }
 	hasLoaded = true;
 });
+
+const updateDarkTheme = isDark => isDark ? document.documentElement.classList.add("dark") : document.documentElement.classList.remove("dark");
+
+const menu = new mdc.menu.MDCMenu($("#settings"));
+const darkTheme = new mdc.switchControl.MDCSwitch($("#dark-theme"));
+darkTheme.listen("change", () => {
+	fetchIt("/api/v1/auth/profile", {method: "PATCH", body: JSON.stringify({darkTheme: darkTheme.checked})}).then(resp => {
+		if(!resp.ok) throw new Error(resp.statusText);
+		updateDarkTheme(darkTheme.checked);
+	}).catch(() => {
+		darkTheme.checked = !darkTheme.checked;
+	});
+});
+
+$("#profile").onclick = () => {
+	menu.open = !menu.open;
+};
 
 $("button#sign-out").onclick = () => firebase.auth().signOut();
 document.querySelectorAll(".sign-in").forEach(button => button.onclick = () => {

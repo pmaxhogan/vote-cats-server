@@ -88,6 +88,7 @@ const updateLikes = () => {
 };
 
 const addPict = pict => {
+	console.log(pict);
 	const panel = document.createElement("div");
 	panel.classList.add("mdc-card");
 	panel.setAttribute("data-timestamp", pict.timeStamp);
@@ -102,6 +103,7 @@ const addPict = pict => {
  <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
  <i class="material-icons mdc-icon-button__icon">favorite_border</i>
 </button>
+<span class = "mdc-typography--overline">${pict.numUsersVoted}</span>
 <button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
 </div>`;
 	// add the panel

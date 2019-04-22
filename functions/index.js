@@ -7,7 +7,7 @@ const app = express();
 app.disable("x-powered-by");
 app.use(express.json({
   inflate: true,
-  limit: "100kb",
+  limit: "10kb",
   reviver: null,
   strict: true,
   type: "application/json",

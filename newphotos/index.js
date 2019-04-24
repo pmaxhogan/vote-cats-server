@@ -58,7 +58,7 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 			const stream = storageRef.file(basePath + "/" + encodeURIComponent(URL)).createWriteStream({
 				gzip: true,
 		  	metadata: {
-		    	cacheControl: 'public, max-age=31536000',
+		    	cacheControl: "public, max-age=31536000",
 		  	}
 			});
 
@@ -77,7 +77,7 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 				img.redirUrl = res.url;
 	      i++;
 	      console.log("added img", img, "num", i);
-	      addDoc(img).then(() => i > 5 && process.exit());
+	      addDoc(img).then(() => i > 30 && process.exit());
 			});
 		});
   });
@@ -95,5 +95,5 @@ imagesRef.get().then(snapshot => {
 
   newImg();
 
-  setInterval(newImg, 1500);
+  setInterval(newImg, 1000);
 });

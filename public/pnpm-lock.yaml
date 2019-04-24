@@ -1,4 +1,5 @@
 dependencies:
+  date-fns: 2.0.0-alpha.27
   material-components-web: 1.1.1
 lockfileVersion: 5
 packages:
@@ -448,6 +449,11 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Oeqbjci1cC7jTE8/n3dwnkqKe9ZeWiaE+rgMtRYtRFw1HvAw14SpGA5EEAS/Li2Hu2KZ50FYCe3HYqShfxtChA==
+  /date-fns/2.0.0-alpha.27:
+    dev: false
+    requiresBuild: true
+    resolution:
+      integrity: sha512-cqfVLS+346P/Mpj2RpDrBv0P4p2zZhWWvfY5fuWrXNR/K38HaAGEkeOwb47hIpQP9Jr/TIxjZ2/sNMQwdXuGMg==
   /focus-trap/4.0.2:
     dependencies:
       tabbable: 3.1.2
@@ -517,4 +523,5 @@ packages:
     resolution:
       integrity: sha1-pcbVMr5lbiPbgg77lDofBJmNY68=
 specifiers:
+  date-fns: ^2.0.0-alpha.27
   material-components-web: ^1.1.1

@@ -1,9 +1,16 @@
 mdc.autoInit();
 
-// some browsers scroll you to where you were
+// some browsers scroll you to where you were last
 scrollTo(0, 0);
 
 const $ = selector => document.querySelector(selector);
+
+const imageshowcase = $("#imageshowcase");
+const imageshowcaseDialog = new mdc.dialog.MDCDialog(imageshowcase);
+const imageshowcaseDialogFavButton = new mdc.iconButton.MDCIconButtonToggle(document.querySelector("#imageshowcase .add-to-favorites"));
+imageshowcaseDialog.listen("MDCDialog:opened", () => {
+  imageshowcaseDialogFavButton.ripple.layout();
+});
 
 
 const dialog = new mdc.dialog.MDCDialog($("#sign-in-modal"));
@@ -47,6 +54,32 @@ const fetchIt = async (url, options = {}, allowNoAuth = true) => {
 	}
 };
 
+const showcaseImage = id => {
+	fetchIt(`/api/v1/picts/${id}`).then(x=>{
+		if(x.ok){
+			return x.json();
+		}
+		throw new Error(x);
+	}).then(img => {
+		imageshowcase.querySelector("img").setAttribute("src", img.url);
+		const abbr = imageshowcase.querySelector("abbr");
+		const imgDate = new Date(img.timeStamp);
+		abbr.setAttribute("title", imgDate.toLocaleString());
+		abbr.innerText = dateFns.distanceInWordsToNow(imgDate, {addSuffix: true, includeSeconds: true});
+
+		const favButton = imageshowcase.querySelector(".add-to-favorites");
+		procFavButton(favButton, imageshowcaseDialogFavButton, img.timeStamp, imageshowcase.querySelector(".num-likes"));
+
+		imageshowcase.setAttribute("data-timestamp", img.timeStamp);
+
+		imageshowcase.querySelector(".num-likes").innerText = img.numUsersVoted;
+
+		imageshowcase.mdcFavButton = imageshowcaseDialogFavButton;
+		imageshowcaseDialog.open();
+		updateLikes();
+	});
+};
+
 const getRealHeightOfHighestColumn = () => {
   return getShortestColumn().offsetHeight;
 };
@@ -80,58 +113,41 @@ let myLikes = [];
 const updateLikes = () => {
 	document.querySelectorAll("[data-timestamp]").forEach(x=>x.mdcFavButton.on = false);
 	myLikes.forEach(like => {
-		const card = $(`[data-timestamp="${like}"]`);
-		if(card){
-			card.mdcFavButton.on = true;
-		}
+		const elems = document.querySelectorAll(`[data-timestamp="${like}"]`);
+		elems.forEach(elem => elem.mdcFavButton.on = true);
 	});
 };
 
-const addPict = pict => {
-	console.log(pict);
-	const panel = document.createElement("div");
-	panel.classList.add("mdc-card");
-	panel.setAttribute("data-timestamp", pict.timeStamp);
-	panel.innerHTML = `
-<img class = "mdc-card__media mdc-card__primary-action" src = "${pict.dispUrl || pict.url}"/>
-<div class="mdc-card__actions mdc-card__actions--full-bleed">
-<button id="add-to-favorites"
- class="mdc-icon-button mdc-card__action mdc-card__action--icon"
- aria-label="Add to favorites"
- aria-hidden="true"
- aria-pressed="false">
- <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
- <i class="material-icons mdc-icon-button__icon">favorite_border</i>
-</button>
-<span class = "mdc-typography--overline">${pict.numUsersVoted}</span>
-<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
-</div>`;
-	// add the panel
-	getShortestColumn().appendChild(panel);
-
-	// initalize the button
-	const favButton = panel.querySelector("button");
-	(new mdc.ripple.MDCRipple(favButton)).unbounded = true;
-	const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
-	panel.mdcFavButton = mdcFavButton;
-
-	// when the button is cliked
+const procFavButton = (favButton, mdcFavButton, id, counter) => {
 	favButton.addEventListener("MDCIconButtonToggle:change", e => {
-		fetchIt(`/api/v1/picts/${pict.timeStamp}/${e.detail.isOn ? "" : "un"}favorite`, {
+		fetchIt(`/api/v1/picts/${id}/${e.detail.isOn ? "" : "un"}favorite`, {
 			method: "PUT"
 		}).then(resp => {
 			// if the request failed
 			if(resp.status === 403){// if you're not signed in
 				dialog.open();
-			}
-			if(!resp.ok && resp.status !== 400){
-				// put the button back where  it was
+			}else if(!resp.ok && resp.status !== 400){
+				console.log("ERROR - resetting button", favButton);
+				// put the button back where it was
 				mdcFavButton.on = !e.detail.isOn;
+			}else{
+				let diff = 0;
+				if(e.detail.isOn){
+					myLikes.push(id);
+					diff = 1;// add one
+				}else {
+					const index = myLikes.indexOf(id);
+					if(index > -1) myLikes.splice(index, 1);
+					diff = -1;// subtract one
+				}
+				counter.innerText = parseInt(counter.innerText) + diff;
+				updateLikes();
 			}
 		});
 	});
+};
 
-	panel.querySelector(".delete").addEventListener("click", () => {
+const procDeleteButton = button => button.addEventListener("click", () => {
 		fetchIt("/api/v1/admin/picts/delete/" + pict.timeStamp).then(resp => {
 			// if the request succeded, remove the panel
 			if(resp.ok){
@@ -139,6 +155,43 @@ const addPict = pict => {
 			}
 		});
 	});
+
+const addPict = pict => {
+	console.log(pict);
+	const panel = document.createElement("div");
+	panel.classList.add("mdc-card");
+	panel.setAttribute("data-timestamp", pict.timeStamp);
+	panel.innerHTML = `
+<div class = "mdc-card__media mdc-card__primary-action" tabindex="0"><img src = "${pict.dispUrl || pict.url}"/>
+</div>
+<div class="mdc-card__actions mdc-card__actions--full-bleed">
+<button class="add-to-favorites mdc-icon-button mdc-card__action mdc-card__action--icon"
+ aria-label="Add to favorites"
+ aria-hidden="true"
+ aria-pressed="false">
+ <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
+ <i class="material-icons mdc-icon-button__icon">favorite_border</i>
+</button>
+<span class = "mdc-typography--overline num-likes">${pict.numUsersVoted}</span>
+<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
+</div>`;
+	// add the panel
+	getShortestColumn().appendChild(panel);
+
+	new mdc.ripple.MDCRipple(panel.querySelector(".mdc-card__primary-action"));
+
+	// initalize the button
+	const favButton = panel.querySelector("button");
+	(new mdc.ripple.MDCRipple(favButton)).unbounded = true;
+	const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
+	panel.mdcFavButton = mdcFavButton;
+
+	panel.querySelector(".mdc-card__primary-action").onclick = () => showcaseImage(pict.timeStamp);
+
+		// when the button is cliked
+	procFavButton(favButton, mdcFavButton, pict.timeStamp, panel.querySelector(".num-likes"));
+
+	procDeleteButton(panel.querySelector(".delete"));
 	// console.log("\t" + pict.timeStamp);
 	lastTimeStamp = new Date(pict.timeStamp);
 	updateLikes();

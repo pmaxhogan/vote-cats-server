@@ -5,9 +5,11 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>Vote Cats</title>
 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.0.0-alpha0/date_fns.min.js"></script>
+
 	<!-- <link rel="preconnect" href="https://cors-anywhere.herokuapp.com/">
 	<link rel="preconnect" href="https://thecatapi.com/"> -->
-	<link rel="stylesheet" href="node_modules/material-components-web/dist/material-components-web.min.css">
+	<link rel="stylesheet" href="/node_modules/material-components-web/dist/material-components-web.min.css">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<link rel="stylesheet" href = "/css/index.css">
 
@@ -33,12 +35,12 @@
 							<ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical">
 								<li class="mdc-list-item" role="menuitem">
 									<div class="mdc-switch form-field" id = "dark-theme">
-									  <div class="mdc-switch__track"></div>
-									  <div class="mdc-switch__thumb-underlay">
-									    <div class="mdc-switch__thumb">
-									        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch">
-									    </div>
-									  </div>
+										<div class="mdc-switch__track"></div>
+										<div class="mdc-switch__thumb-underlay">
+											<div class="mdc-switch__thumb">
+												<input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch">
+											</div>
+										</div>
 									</div>
 									<label for="basic-switch">Dark theme</label>
 								</li>
@@ -87,6 +89,7 @@
 	</div>
 	<div class="mdc-dialog__scrim"></div>
 </div>
+</div>
 
 <!-- Templates -->
 <template id = "panel-template">
@@ -100,6 +103,36 @@
 		</p>
 	</div>
 </template>
+
+<div id = "imageshowcase" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-describedby="imageshowcase-content">
+	<div class="mdc-dialog__container">
+		<div class="mdc-dialog__surface" id="imageshowcase-dialog">
+			<!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
+			<!--       <h2 class="mdc-dialog__title" id="my-dialog-title">E</h2> -->
+			<div class="mdc-dialog__content" id="imageshowcase-content">
+				<div class="imageshowcase-layout-grid">
+					<div>
+						<img src = "" tabindex = "0"/>
+					</div>
+					<div class="imageshowcase-layout-grid-cell">
+						<div class="flex-center">
+							<button class="add-to-favorites mdc-icon-button" aria-label="Add to favorites" aria-hidden="true" aria-pressed="false">
+								<i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
+								<i class="material-icons mdc-icon-button__icon">favorite_border</i>
+							</button>
+							<span class="mdc-typography--overline num-likes"></span>
+							<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
+						</div>
+						<div>Posted <abbr title = ""></abbr> by anon</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="mdc-dialog__scrim"></div>
+</div>
+
+
 <script src="/__/firebase/4.7.0/firebase-app.js"></script>
 <script src="/__/firebase/4.7.0/firebase-auth.js"></script>
 <!-- <script defer src="/__/firebase/4.7.0/firebase-database.js"></script>

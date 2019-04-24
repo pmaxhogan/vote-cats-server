@@ -31,8 +31,12 @@
 	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
 }
 
-html.dark{
-	--mdc-theme-secondary: #651fff;
+:root{
+	--mdc-theme-primary: #018786;
+	--gutter-size: 0.5rem;
+}
+
+:root.dark{
   --mdc-theme-background: #000000;
   --mdc-theme-surface: white;
 }
@@ -64,7 +68,6 @@ h1 {
 	display: inline-block;
 }
 .masonry-layout {
-	--gutter-size: 0.5rem;
 	margin-top: var(--gutter-size);
 	display: flex;
 	flex-direction: row;
@@ -81,7 +84,7 @@ h1 {
 .mdc-card{
 	margin-bottom: calc(var(--gutter-size) * 2);
 }
-img{
+.mdc-card img{
 	width: 100%;
 }
 .hidden{
@@ -140,4 +143,31 @@ body.admin .delete{
 }
 .form-field + label{
 	margin-left: 10px;
+}
+
+
+#imageshowcase-dialog{
+  width: 95vw;
+	max-width: 95vw;
+}
+
+#imageshowcase img{
+  max-width: 100%;
+}
+
+#imageshowcase .flex-center{
+  display: flex;
+  align-items: center;
+}
+
+.imageshowcase-layout-grid{
+	display: flex;
+}
+
+.imageshowcase-layout-grid-cell{
+	padding-left: 24px;
+}
+
+#imageshowcase-content{
+	padding-top: 24px;
 }

@@ -9,6 +9,7 @@
   "author": "programmer5000",
   "license": "GPL-3.0",
   "dependencies": {
+    "date-fns": "^2.0.0-alpha.27",
     "material-components-web": "^1.1.1"
   }
 }

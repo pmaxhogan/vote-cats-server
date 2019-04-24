@@ -168,14 +168,19 @@ app.get(base + "picts/getalot", (req, res) => {
 		return res.status(400).send("Invalid param");
 	}
 
+	console.log(req.query.ids);
+
 	db.getAll(req.query.ids.map(id => imagesRef.doc(id))).then(snapshot => {
     const data = [];
     snapshot.forEach(doc => {
-			data.push(procImageData(doc.data(), req.user));
-      data[doc.id] = doc.data();
+			if(doc.exists){
+				data.push(procImageData(doc.data(), req.user));
+	      data[doc.id] = doc.data();
+			}
     });
     res.json(data);
   }).catch(e => {
+		console.error(e);
 		return res.status(400).send("Invalid id");
 	});
 });

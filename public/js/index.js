@@ -20,6 +20,23 @@ dialog.listen("MDCDialog:closed", e => {
 	}
 });
 
+let isFavsOnly = false;
+const switchToFavsOnly = () => {
+	isFavsOnly = true;
+	emptyColumns();
+	imgs = [];
+	fetchIt(`/api/v1/picts/getalot?${myLikes.reduce((acc, like) => acc + "&ids[]=" + like, "").slice(1)}`).then(x=>x.json()).then(data => {
+		imgs = data;
+		myLikes - data.map(img => img.timeStamp);
+		data.forEach(img => addPict(img))
+	});
+};
+const switchToAllPicts = () => {
+	isFavsOnly = false;
+	emptyColumns();
+	imgs = [];
+	addImgs(7 * calcNumColumns(innerWidth))
+};
 
 // if if we've ran out of content
 let noMore = false;
@@ -66,6 +83,8 @@ const showcaseImage = id => {
 		const imgDate = new Date(img.timeStamp);
 		abbr.setAttribute("title", imgDate.toLocaleString());
 		abbr.innerText = dateFns.distanceInWordsToNow(imgDate, {addSuffix: true, includeSeconds: true});
+
+		procDeleteButton(imageshowcase.querySelector(".delete"), img.timeStamp);
 
 		const favButton = imageshowcase.querySelector(".add-to-favorites");
 		procFavButton(favButton, imageshowcaseDialogFavButton, img.timeStamp, imageshowcase.querySelector(".num-likes"));
@@ -147,14 +166,19 @@ const procFavButton = (favButton, mdcFavButton, id, counter) => {
 	});
 };
 
-const procDeleteButton = button => button.addEventListener("click", () => {
-		fetchIt("/api/v1/admin/picts/delete/" + pict.timeStamp).then(resp => {
+const procDeleteButton = (button, id) => button.addEventListener("click", () => {
+		fetchIt("/api/v1/admin/picts/delete/" + id).then(resp => {
 			// if the request succeded, remove the panel
 			if(resp.ok){
-				panel.remove();
+				document.querySelectorAll(`mdc-card[data-timeStamp="${id}"]`).forEach(elem => elem.remove());
+				imageshowcaseDialog.close();
+				return;
 			}
+			throw new Error(resp.statusText);
 		});
 	});
+
+const emptyColumns = () => document.querySelectorAll(".masonry-layout-column").forEach(x=>x.innerHTML="");
 
 const addPict = pict => {
 	console.log(pict);
@@ -191,7 +215,7 @@ const addPict = pict => {
 		// when the button is cliked
 	procFavButton(favButton, mdcFavButton, pict.timeStamp, panel.querySelector(".num-likes"));
 
-	procDeleteButton(panel.querySelector(".delete"));
+	procDeleteButton(panel.querySelector(".delete"), pict.timeStamp);
 	// console.log("\t" + pict.timeStamp);
 	lastTimeStamp = new Date(pict.timeStamp);
 	updateLikes();
@@ -329,25 +353,29 @@ const calcNumColumns = (width) => {
 	return num;
 };
 
+const reflowImgs = () => {
+	const parent = $(".masonry-layout");
+
+	// empty it
+	while (parent.hasChildNodes()) {
+		parent.removeChild(parent.lastChild);
+	}
+
+	for(let i = 0; i < currentColumns; i ++){
+		const div = document.createElement("div");
+		div.classList.add("masonry-layout-column");
+		parent.appendChild(div);
+	}
+
+	imgs.forEach(addPict);
+};
+
 const updateColumns = () => {
 	pastColumns = currentColumns;
 	currentColumns = calcNumColumns(innerWidth);
 	if(currentColumns !== pastColumns){
 		console.log("going from", pastColumns, "to", currentColumns);
-		const parent = $(".masonry-layout");
-
-		// empty it
-		while (parent.hasChildNodes()) {
-	  	parent.removeChild(parent.lastChild);
-		}
-
-		for(let i = 0; i < currentColumns; i ++){
-			const div = document.createElement("div");
-			div.classList.add("masonry-layout-column");
-			parent.appendChild(div);
-		}
-
-		imgs.forEach(addPict);
+		reflowImgs();
 	}
 };
 

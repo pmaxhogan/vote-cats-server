@@ -1,5 +1,7 @@
 mdc.autoInit();
 
+let loadedState = null;
+
 // some browsers scroll you to where you were last
 scrollTo(0, 0);
 
@@ -23,7 +25,6 @@ dialog.listen("MDCDialog:closed", e => {
 let isFavsOnly = false;
 const switchToFavsOnly = () => {
 	isFavsOnly = true;
-	emptyColumns();
 	imgs = [];
 	fetchIt(`/api/v1/picts/getalot?${myLikes.reduce((acc, like) => acc + "&ids[]=" + like, "").slice(1)}`).then(x=>x.json()).then(data => {
 		imgs = data;
@@ -33,7 +34,6 @@ const switchToFavsOnly = () => {
 };
 const switchToAllPicts = () => {
 	isFavsOnly = false;
-	emptyColumns();
 	imgs = [];
 	addImgs(7 * calcNumColumns(innerWidth))
 };
@@ -267,7 +267,10 @@ onscroll = e => {
 
 let hasLoaded = false;
 firebase.auth().onAuthStateChanged(function(user) {
-	if(!hasLoaded) addImgs(7 * calcNumColumns(innerWidth));
+	if(!hasLoaded){
+		hasLoaded = true;
+		checkState();
+	}
   if (user) {
 		fetchIt("/api/v1/mylikes").then(x=>{
 			if(x.ok) return x.json();
@@ -310,7 +313,6 @@ firebase.auth().onAuthStateChanged(function(user) {
     $("#signed-in").classList.add("hidden");
 		disableAdmin();
   }
-	hasLoaded = true;
 });
 
 const updateDarkTheme = isDark => isDark ? document.documentElement.classList.add("dark") : document.documentElement.classList.remove("dark");
@@ -381,3 +383,27 @@ const updateColumns = () => {
 
 onresize = () => updateColumns();
 updateColumns();
+
+onpopstate = () => checkState();
+
+const checkState = () => {
+	console.log(loadedState, location.href);
+	if(loadedState !== location.href && hasLoaded){
+		loadedState = location.href;
+		emptyColumns();
+		if(location.pathname === "/"){
+			switchToAllPicts();
+		}else if(location.pathname === "/favs"){
+			switchToFavsOnly();
+		}
+	}
+};
+
+//history.pushState(null, "", "/")
+
+document.querySelectorAll("[data-spa]").forEach(link => link.onclick = e => {
+	history.pushState(null, "", link.getAttribute("href"));
+	checkState();
+	e.preventDefault();
+	return false;
+});

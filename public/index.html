@@ -21,8 +21,8 @@
 			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
 				<a href="/" data-spa class="material-icons mdc-top-app-bar__navigation-icon">menu</a>
 				<h1 class="mdc-top-app-bar__title">Vote Cats</h1>
-			<!-- </section>
-			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar"> -->
+				<!-- </section>
+				<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar"> -->
 				<a href="/" data-spa class="mdc-top-app-bar__action-item" aria-label="Favorites"><span class = "material-icons">home</span></a>
 				<a href="/favs" data-spa class="mdc-top-app-bar__action-item" aria-label="Favorites"><span class = "material-icons">favorite</span></a>
 			</section>
@@ -57,6 +57,7 @@
 								</li>
 								<li class = "mdc-list-item">
 									<button id = "sign-out" class = "mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple">Sign out</button>
+								</li>
 							</ul>
 						</div>
 					</div>
@@ -80,47 +81,29 @@
 		</div>
 	</div>
 
-	<div id = "sign-in-modal" class="mdc-dialog"
-	role="alertdialog"
-	aria-modal="true"
-	aria-labelledby="fav-dialog-title">
-	<div class="mdc-dialog__container">
-		<div class="mdc-dialog__surface">
-			<!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
-			<h2 class="mdc-dialog__title" id="fav-dialog-title"><!--
-			-->You need to be signed in to favorite a picture.<!--
-		--></h2>
-		<footer class="mdc-dialog__actions">
-			<button tabindex = "1" type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close">
-				<span class="mdc-button__label">Cancel</span>
-			</button>
-			<button tabindex = "0" type="button" class="mdc-button mdc-dialog__button mdc-dialog__button--default mdc-button--raised mdc-dialog__button--default" data-mdc-dialog-action="accept">
-				<span class="mdc-button__label">Sign in with Google</span>
-			</button>
-		</footer>
+	<div id = "sign-in-modal" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="fav-dialog-title">
+		<div class="mdc-dialog__container">
+			<div class="mdc-dialog__surface">
+				<!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
+				<h2 class="mdc-dialog__title" id="fav-dialog-title"><!--
+				-->You need to be signed in to favorite a picture.<!--
+			--></h2>
+			<footer class="mdc-dialog__actions">
+				<button tabindex = "1" type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close">
+					<span class="mdc-button__label">Cancel</span>
+				</button>
+				<button tabindex = "0" type="button" class="mdc-button mdc-dialog__button mdc-dialog__button--default mdc-button--raised mdc-dialog__button--default" data-mdc-dialog-action="accept">
+					<span class="mdc-button__label">Sign in with Google</span>
+				</button>
+			</footer>
+		</div>
+		<div class="mdc-dialog__scrim"></div>
 	</div>
-	<div class="mdc-dialog__scrim"></div>
 </div>
-</div>
-
-<!-- Templates -->
-<template id = "panel-template">
-	<div class="masonry-layout-panel">
-		<!-- <h2>A cute cat</h2> -->
-		<slot name = "img">The image could not be loaded.</slot>
-		<p class = "mdc-card__supporting-text">
-			From <slot name = "src">
-				<a href = "https://thecatapi.com">The Cat API</a>
-			</slot>. <button class = "delete">Delete</button>
-		</p>
-	</div>
-</template>
 
 <div id = "imageshowcase" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-describedby="imageshowcase-content">
 	<div class="mdc-dialog__container">
 		<div class="mdc-dialog__surface" id="imageshowcase-dialog">
-			<!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
-			<!--       <h2 class="mdc-dialog__title" id="my-dialog-title">E</h2> -->
 			<div class="mdc-dialog__content" id="imageshowcase-content">
 				<div class="imageshowcase-layout-grid">
 					<div>
@@ -144,6 +127,19 @@
 	<div class="mdc-dialog__scrim"></div>
 </div>
 
+
+<!-- Templates -->
+<template id = "panel-template">
+	<div class="masonry-layout-panel">
+		<!-- <h2>A cute cat</h2> -->
+		<slot name = "img">The image could not be loaded.</slot>
+		<p class = "mdc-card__supporting-text">
+			From <slot name = "src">
+				<a href = "https://thecatapi.com">The Cat API</a>
+			</slot>. <button class = "delete">Delete</button>
+		</p>
+	</div>
+</template>
 
 <script src="/__/firebase/4.7.0/firebase-app.js"></script>
 <script src="/__/firebase/4.7.0/firebase-auth.js"></script>

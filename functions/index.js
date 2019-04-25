@@ -255,6 +255,8 @@ const getFavorite = isFavorite => (req, res) => {
 	});
 };
 
+app.use(base + "picts/:id/favorite", authenticate);
+app.use(base + "picts/:id/unfavorite", authenticate);
 app.put(base + "picts/:id/favorite", getFavorite(true));
 app.put(base + "picts/:id/unfavorite", getFavorite(false));
 

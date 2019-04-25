@@ -317,6 +317,8 @@ firebase.auth().onAuthStateChanged(function(user) {
 
 const updateDarkTheme = isDark => isDark ? document.documentElement.classList.add("dark") : document.documentElement.classList.remove("dark");
 
+const signInMenu = new mdc.menu.MDCMenu($("#sign-in-menu"));
+
 const menu = new mdc.menu.MDCMenu($("#settings"));
 const darkTheme = new mdc.switchControl.MDCSwitch($("#dark-theme"));
 darkTheme.listen("change", () => {
@@ -330,6 +332,9 @@ darkTheme.listen("change", () => {
 
 $("#profile").onclick = () => {
 	menu.open = !menu.open;
+};
+$("#sign-in-or-sign-up").onclick = () => {
+	signInMenu.open = !signInMenu.open;
 };
 
 $("button#sign-out").onclick = () => firebase.auth().signOut();

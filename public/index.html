@@ -20,13 +20,23 @@
 		<div class="mdc-top-app-bar__row">
 			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
 				<a href="/" data-spa class="material-icons mdc-top-app-bar__navigation-icon">menu</a>
-				<span class="mdc-top-app-bar__title">Vote Cats</span>
-				<a href="/favs" data-spa class="material-icons mdc-top-app-bar__action-item" aria-label="Favorites">favorite</a>
+				<h1 class="mdc-top-app-bar__title">Vote Cats</h1>
+			</section>
+			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
+				<a href="/" data-spa class="mdc-top-app-bar__action-item" aria-label="Favorites"><span class = "material-icons">home</span></a>
+				<a href="/favs" data-spa class="mdc-top-app-bar__action-item" aria-label="Favorites"><span class = "material-icons">favorite</span></a>
 			</section>
 			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
 				<div id = "signed-out" class = "hidden">
-					<h2 id = "sign-in-with" class="mdc-typography--subheading2">Sign in or sign up with</h2>
-					<button class = "sign-in mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple" data-auth-name = "Google"><img src="/img/google_logo.png" class = "logo-button"></button>
+					<div class="mdc-menu-surface--anchor">
+						<button class = "mdc-button" id = "sign-in-or-sign-up">Sign in or sign up</button>
+						<div id = "sign-in-menu" class="mdc-menu mdc-menu-surface" tabindex="-1">
+							<ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical">
+								<li class="mdc-list-item mdc-button sign-in mdc-ripple-surface" role="menuitem" data-mdc-auto-init="MDCRipple" data-auth-name = "Google"><img src="/img/google_logo.png" class = "logo-button">
+								</li>
+							</ul>
+						</div>
+					</div>
 				</div>
 
 				<div id = "signed-in" class = "hidden">
@@ -45,10 +55,11 @@
 									</div>
 									<label for="basic-switch">Dark theme</label>
 								</li>
+								<li class = "mdc-list-item">
+									<button id = "sign-out" class = "mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple">Sign out</button>
 							</ul>
 						</div>
 					</div>
-					<button id = "sign-out" class = "mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple">Sign out</button>
 				</div>
 			</section>
 		</div>

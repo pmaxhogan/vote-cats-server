@@ -148,14 +148,15 @@ body.admin .delete{
 	margin-left: 10px;
 }
 
+#imageshowcase-content > div > div:nth-child(1){
+	min-width: 350px;
+	min-height: 10vw;
+}
 
 #imageshowcase-dialog{
   width: 95vw;
 	max-width: 95vw;
-}
-
-#imageshowcase img{
-  max-width: 100%;
+	min-height: 10vw;
 }
 
 #imageshowcase .flex-center{

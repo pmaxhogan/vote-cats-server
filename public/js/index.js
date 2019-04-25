@@ -13,7 +13,10 @@ const imageshowcaseDialogFavButton = new mdc.iconButton.MDCIconButtonToggle(docu
 imageshowcaseDialog.listen("MDCDialog:opened", () => {
   imageshowcaseDialogFavButton.ripple.layout();
 });
-
+imageshowcaseDialog.listen("MDCDialog:closing", () => {
+  history.pushState(null, "", "/");
+	checkState();
+});
 
 const dialog = new mdc.dialog.MDCDialog($("#sign-in-modal"));
 dialog.listen("MDCDialog:closed", e => {
@@ -124,7 +127,7 @@ const updateAdmin = () => {
 	});
 };
 
-let lastTimeStamp;
+let lastTimeStamp = null;
 
 let imgs = [];
 let myLikes = [];
@@ -210,9 +213,12 @@ const addPict = pict => {
 	const mdcFavButton = new mdc.iconButton.MDCIconButtonToggle(favButton);
 	panel.mdcFavButton = mdcFavButton;
 
-	panel.querySelector(".mdc-card__primary-action").onclick = () => showcaseImage(pict.timeStamp);
+	panel.querySelector(".mdc-card__primary-action").onclick = () => {
+		history.pushState(null, "", "/pict/" + pict.timeStamp);
+		checkState();
+	};
 
-		// when the button is cliked
+	// when the button is cliked
 	procFavButton(favButton, mdcFavButton, pict.timeStamp, panel.querySelector(".num-likes"));
 
 	procDeleteButton(panel.querySelector(".delete"), pict.timeStamp);
@@ -315,7 +321,7 @@ firebase.auth().onAuthStateChanged(function(user) {
   }
 });
 
-const updateDarkTheme = isDark => isDark ? document.documentElement.classList.add("dark") : document.documentElement.classList.remove("dark");
+const updateDarkTheme = isDark => isDark ?document.documentElement.classList.add("dark") : document.documentElement.classList.remove("dark");
 
 const signInMenu = new mdc.menu.MDCMenu($("#sign-in-menu"));
 
@@ -392,15 +398,24 @@ updateColumns();
 onpopstate = () => checkState();
 
 const checkState = () => {
+	imgs = [];
+	lastTimeStamp = null;
 	console.log(loadedState, location.href);
 	if(loadedState !== location.href && hasLoaded){
+		console.log("loading", location.href);
 		loadedState = location.href;
 		emptyColumns();
-		if(location.pathname === "/"){
-			switchToAllPicts();
-		}else if(location.pathname === "/favs"){
-			switchToFavsOnly();
-		}
+		setTimeout(() => {
+			if(location.pathname === "/"){
+				console.log("switchToAllPicts");
+				switchToAllPicts();
+			}else if(location.pathname === "/favs"){
+				switchToFavsOnly();
+			}else if(location.pathname.startsWith("/pict/")){
+				console.log("location.pathname.slice(5)");
+				showcaseImage(location.pathname.slice(5));
+			}
+		}, 0);
 	}
 };
 

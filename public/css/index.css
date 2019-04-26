@@ -175,3 +175,29 @@ body.admin .delete{
 #imageshowcase-content{
 	padding-top: 24px;
 }
+
+#post-extras{
+  flex-grow: 1;
+  max-width: 100%;
+}
+
+#post-extras .mdc-text-field.mdc-text-field--textarea{
+  margin: 12px 0;
+}
+
+#post-extras textarea,#post-extras .mdc-text-field.mdc-text-field--textarea{
+  width: 100%;
+  resize: vertical;
+  max-height: 90%;
+}
+
+.profile-pict{
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+
+.comment > span {
+    padding-left: 6px;
+}

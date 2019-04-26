@@ -97,6 +97,33 @@ const showcaseImage = id => {
 		imageshowcase.querySelector(".num-likes").innerText = img.numUsersVoted;
 
 		imageshowcase.mdcFavButton = imageshowcaseDialogFavButton;
+
+		if(img.comments && img.comments.length){
+			img.comments.forEach(comment => {
+				const div = document.createElement("div");
+				div.classList.add("comment");
+
+				const img = document.createElement("img");
+				img.classList.add("profile-pict");
+				img.setAttribute("src", comment.profileImageLink);
+
+				const userName = document.createElement("span");
+				userName.classList.add("mdc-typography--overline");
+				userName.classList.add("user-name");
+				userName.innerText = comment.userName;
+
+				const text = document.createElement("span");
+				text.classList.add("comment-text");
+				text.innerText = comment.content;
+
+				div.appendChild(img);
+				div.appendChild(userName);
+				div.appendChild(text);
+
+				imageshowcase.querySelector("#comments").appendChild(div);
+			});
+		}
+
 		imageshowcaseDialog.open();
 		updateLikes();
 	});
@@ -407,11 +434,14 @@ const checkState = () => {
 		emptyColumns();
 		setTimeout(() => {
 			if(location.pathname === "/"){
+				document.title = "Home - Vote Cats";
 				console.log("switchToAllPicts");
 				switchToAllPicts();
 			}else if(location.pathname === "/favs"){
+				document.title = "My Favorites - Vote Cats";
 				switchToFavsOnly();
 			}else if(location.pathname.startsWith("/pict/")){
+				document.title = "A Picture - Vote Cats";
 				console.log("location.pathname.slice(5)");
 				showcaseImage(location.pathname.slice(5));
 			}

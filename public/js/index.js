@@ -513,6 +513,9 @@ const checkState = () => {
 			}else if(location.pathname.startsWith("/pict/")){
 				document.title = "A Picture - Vote Cats";
 				showcaseImage(location.pathname.slice(6));
+			}else{
+				// basic 404 handling
+				location.href = "/";
 			}
 		}, 0);
 	}

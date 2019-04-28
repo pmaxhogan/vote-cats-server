@@ -25,7 +25,7 @@ imageshowcaseDialog.listen("MDCDialog:closing", () => {
 const dialog = new mdc.dialog.MDCDialog($("#sign-in-modal"));
 dialog.listen("MDCDialog:closed", e => {
 	if(e.detail.action === "accept"){
-		firebase.auth().signInWithPopup(new firebase.auth["GoogleAuthProvider"]());
+		firebase.auth().signInWithPopup(new firebase.auth["GoogleAuthProvider"]()).then(() => dialog.close());
 	}
 });
 
@@ -171,7 +171,7 @@ const showcaseImage = id => {
 		};
 		commentArea.onfocus = () => {
 			if(!firebase.auth().currentUser){
-				$("#sign-in-modal-text").innerText = "You need to be signed in to comment on a picture";
+				$("#fav-dialog-title").innerText = "You need to be signed in to comment on a picture";
 				dialog.open();
 			}
 		};
@@ -512,8 +512,7 @@ const checkState = () => {
 				switchToFavsOnly();
 			}else if(location.pathname.startsWith("/pict/")){
 				document.title = "A Picture - Vote Cats";
-				console.log("location.pathname.slice(5)");
-				showcaseImage(location.pathname.slice(5));
+				showcaseImage(location.pathname.slice(6));
 			}
 		}, 0);
 	}

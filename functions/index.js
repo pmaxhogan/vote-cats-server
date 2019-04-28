@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
@@ -43,8 +44,12 @@ const checkIfAdmin = user => admins.includes(user.uid);
 const procImageData = (data, user)=>{
 	data.timeStamp = data.timeStamp.toDate();
 	if(user) data.iVoted = data.usersVoted.includes(user.uid);
-	// if you"re not an admin, don"t tell you who voted for who
+	// if you're not an admin, don't tell you who voted for who
 	if(!user || !checkIfAdmin(user)) delete data.usersVoted;
+
+	if(data.comments && (!user || !checkIfAdmin(user))){
+		data.comments = data.comments.filter(comment => !comment.isDeleted);
+	}
 	return data;
 };
 
@@ -269,15 +274,41 @@ app.put(base + "picts/:id/comment", (req, res) => {
 		if(!doc.exists) return res.status(404).end();
 		const data = doc.data();
 		const comments = data.comments || [];
-		const comment = {picture: req.user.picture, username: req.user.name,content: req.query.content};
+		const comment = {
+			picture: req.user.picture,
+			username: req.user.name,
+			content: req.query.content,
+			id: crypto.randomBytes(12).toString("base64"),
+			uid: req.user.uid
+		};
 		comments.push(comment);
-		imagesRef.doc(req.params.id).update({comments}).catch(e => {
+		imagesRef.doc(req.params.id).update({comments}).then(() =>
+		res.status(200).json(comment)).catch(e => {
 			console.error(e);
 			res.status(500).end();
 		});
-		res.status(200).json(comment);
 	});
-	// req.user.
+});
+
+app.delete(base + "picts/:id/comment/:commentid", (req, res) => {
+	imagesRef.doc(req.params.id).get().then(doc => {
+		if(!doc.exists) return res.status(404).end();
+		const data = doc.data();
+		const comments = data.comments || [];
+		const comment = comments.find(comment => comment.id === req.params.commentid);
+
+		if(!comment) return res.status(404).end();
+		console.log(comment.uid, req.user.uid);
+		if(comment.uid !== req.user.uid && !checkIfAdmin(req.user)) return res.status(403).end();
+
+		const index = comments.indexOf(comment);
+		comment.isDeleted = true;
+		imagesRef.doc(req.params.id).update({comments}).then(() =>
+		res.status(200).json(comment)).catch(e => {
+			console.error(e);
+			res.status(500).end();
+		});
+	});
 });
 
 exports.cats = functions.https.onRequest(app);

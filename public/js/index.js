@@ -3,6 +3,8 @@ mdc.autoInit();
 let textField = null;
 let characterCounter = null;
 let loadedState = null;
+let myLikesLock = Promise.resolve([]);
+let lastPage = null;
 
 // some browsers scroll you to where you were last
 scrollTo(0, 0);
@@ -16,7 +18,7 @@ imageshowcaseDialog.listen("MDCDialog:opened", () => {
   imageshowcaseDialogFavButton.ripple.layout();
 });
 imageshowcaseDialog.listen("MDCDialog:closing", () => {
-  history.pushState(null, "", "/");
+  history.pushState(null, "", lastPage || "/");
 	checkState();
 });
 
@@ -31,11 +33,13 @@ let isFavsOnly = false;
 const switchToFavsOnly = () => {
 	isFavsOnly = true;
 	imgs = [];
-	fetchIt(`/api/v1/picts/getalot?${myLikes.reduce((acc, like) => acc + "&ids[]=" + like, "").slice(1)}`).then(x=>x.json()).then(data => {
-		imgs = data;
-		myLikes - data.map(img => img.timeStamp);
-		data.forEach(img => addPict(img))
-	});
+	myLikesLock.then(() => {
+		if(myLikes.length)
+		fetchIt(`/api/v1/picts/getalot?${myLikes.reduce((acc, like) => acc + "&ids[]=" + like, "").slice(1)}`).then(x=>x.json()).then(data => {
+			imgs = data;
+			myLikes - data.map(img => img.timeStamp);
+			data.forEach(img => addPict(img))
+		})});
 };
 const switchToAllPicts = () => {
 	isFavsOnly = false;
@@ -76,9 +80,12 @@ const fetchIt = async (url, options = {}, allowNoAuth = true) => {
 	}
 };
 
-const addComment = (comment) => {
+const addComment = (comment, pictId) => {
 	const div = document.createElement("div");
 	div.classList.add("comment");
+	div.setAttribute("data-uid", comment.uid);
+	div.setAttribute("data-id", comment.id);
+	if(comment.isDeleted) div.classList.add("deleted");
 
 	const img = document.createElement("img");
 	img.classList.add("profile-pict");
@@ -93,11 +100,32 @@ const addComment = (comment) => {
 	text.classList.add("comment-text");
 	text.innerText = comment.content;
 
+	const deleteBtn = document.createElement("button");
+	deleteBtn.classList.add("material-icons");
+	deleteBtn.classList.add("mdc-icon-button");
+	deleteBtn.classList.add("mdc-card__action");
+	deleteBtn.classList.add("mdc-card__action--icon");
+	deleteBtn.classList.add("delete-comment");
+	deleteBtn.setAttribute("title", "delete");
+	deleteBtn.innerText = "delete";
+	if(!firebase.auth().currentUser || (comment.uid !== firebase.auth().currentUser.uid && !isAdmin) || (isAdmin && comment.isDeleted)){
+		deleteBtn.setAttribute("hidden", "hidden");
+	}
+
 	div.appendChild(img);
 	div.appendChild(userName);
 	div.appendChild(text);
+	div.appendChild(deleteBtn);
 
 	imageshowcase.querySelector("#comments").appendChild(div);
+	deleteBtn.onclick = () => {
+		fetchIt("/api/v1/picts/" + pictId + "/comment/" + encodeURIComponent(comment.id), {method: "DELETE"}).then(x=>{
+			if(x.ok) return;
+			throw new Error(x.statusText);
+		}).then(obj => {
+			div.remove();
+		});
+	};
 };
 
 const showcaseImage = id => {
@@ -135,18 +163,24 @@ const showcaseImage = id => {
 					if(x.ok) return x.json();
 					throw new Error(x.statusText);
 				}).then(obj => {
-					addComment(obj);
+					addComment(obj, img.timeStamp);
 			    commentArea.value = "";
 				});
 		    return false;
 		  }
+		};
+		commentArea.onfocus = () => {
+			if(!firebase.auth().currentUser){
+				$("#sign-in-modal-text").innerText = "You need to be signed in to comment on a picture";
+				dialog.open();
+			}
 		};
 
 		if(characterCounter && characterCounter.destroy) characterCounter.destroy(); // this might prevent a memory leak
 		characterCounter = new mdc.textField.MDCTextFieldCharacterCounter($(".mdc-text-field-character-counter"));
 
 		if(img.comments && img.comments.length){
-			img.comments.forEach(addComment);
+			img.comments.forEach(comment => addComment(comment, img.timeStamp));
 		}
 
 		imageshowcaseDialog.open();
@@ -165,8 +199,15 @@ const getShortestColumn = () => {
   return Array.from(columns).sort((a, b) => a.offsetHeight - b.offsetHeight)[0];
 };
 
-const disableAdmin = () => document.body.classList.remove("admin");
-const enableAdmin = () => document.body.classList.add("admin");
+let isAdmin = false;
+const disableAdmin = () => {
+	isAdmin = false;
+	document.body.classList.remove("admin")
+};
+const enableAdmin = () => {
+	isAdmin = true;
+	document.body.classList.add("admin")
+};
 
 disableAdmin();
 
@@ -330,7 +371,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 		checkState();
 	}
   if (user) {
-		fetchIt("/api/v1/mylikes").then(x=>{
+		myLikesLock = fetchIt("/api/v1/mylikes").then(x=>{
 			if(x.ok) return x.json();
 			throw new Error(x.statusText);
 		}).then(likes => {
@@ -449,14 +490,18 @@ updateColumns();
 
 onpopstate = () => checkState();
 
+const emptyComments = () => imageshowcase.querySelector("#comments").innerHTML = "";
+
 const checkState = () => {
 	imgs = [];
 	lastTimeStamp = null;
+	lastPage = loadedState;
 	console.log(loadedState, location.href);
 	if(loadedState !== location.href && hasLoaded){
 		console.log("loading", location.href);
 		loadedState = location.href;
-		emptyColumns();
+		if(loadedState  === "/favs" || location.pathname === "/favs") emptyColumns();
+		emptyComments();
 		setTimeout(() => {
 			if(location.pathname === "/"){
 				document.title = "Home - Vote Cats";

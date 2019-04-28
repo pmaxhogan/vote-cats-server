@@ -199,5 +199,43 @@ body.admin .delete{
 }
 
 .comment > span {
-    padding-left: 6px;
+	padding-left: 6px;
+}
+
+.comment-text{
+	flex-grow: 1;
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+	word-break: break-word;
+	/* display: none; */
+}
+
+.comment .delete-comment{
+	justify-self: auto;
+	align-self: auto;
+	margin-left: auto;
+}
+
+.comment{
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	max-width: 100%;
+	padding: 5px;
+}
+
+.comment.deleted{
+	background: pink;
+}
+
+#imageshowcase-content [hidden]{
+	display: none;
+}
+
+#sign-in-modal{
+	z-index: 10;
+}
+
+#imageshowcase-content .mdc-floating-label--float-above{
+	color: var(--mdc-theme-primary);
 }

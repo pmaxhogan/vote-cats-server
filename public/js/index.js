@@ -1,5 +1,7 @@
 mdc.autoInit();
 
+let textField = null;
+let characterCounter = null;
 let loadedState = null;
 
 // some browsers scroll you to where you were last
@@ -74,6 +76,30 @@ const fetchIt = async (url, options = {}, allowNoAuth = true) => {
 	}
 };
 
+const addComment = (comment) => {
+	const div = document.createElement("div");
+	div.classList.add("comment");
+
+	const img = document.createElement("img");
+	img.classList.add("profile-pict");
+	img.setAttribute("src", comment.picture);
+
+	const userName = document.createElement("span");
+	userName.classList.add("mdc-typography--overline");
+	userName.classList.add("user-name");
+	userName.innerText = comment.username;
+
+	const text = document.createElement("span");
+	text.classList.add("comment-text");
+	text.innerText = comment.content;
+
+	div.appendChild(img);
+	div.appendChild(userName);
+	div.appendChild(text);
+
+	imageshowcase.querySelector("#comments").appendChild(div);
+};
+
 const showcaseImage = id => {
 	fetchIt(`/api/v1/picts/${id}`).then(x=>{
 		if(x.ok){
@@ -98,30 +124,29 @@ const showcaseImage = id => {
 
 		imageshowcase.mdcFavButton = imageshowcaseDialogFavButton;
 
+
+		if(textField && textField.destroy) textField.destroy(); // this might prevent a memory leak
+		textField = new mdc.textField.MDCTextField($(".mdc-text-field"));
+		const commentArea = $("#textarea");
+		commentArea.onkeypress = e => {
+		  if(e.key === "Enter"){
+		    e.preventDefault();
+		    fetchIt("/api/v1/picts/" + img.timeStamp + "/comment?content=" + encodeURIComponent(commentArea.value), {method: "PUT"}).then(x=>{
+					if(x.ok) return x.json();
+					throw new Error(x.statusText);
+				}).then(obj => {
+					addComment(obj);
+			    commentArea.value = "";
+				});
+		    return false;
+		  }
+		};
+
+		if(characterCounter && characterCounter.destroy) characterCounter.destroy(); // this might prevent a memory leak
+		characterCounter = new mdc.textField.MDCTextFieldCharacterCounter($(".mdc-text-field-character-counter"));
+
 		if(img.comments && img.comments.length){
-			img.comments.forEach(comment => {
-				const div = document.createElement("div");
-				div.classList.add("comment");
-
-				const img = document.createElement("img");
-				img.classList.add("profile-pict");
-				img.setAttribute("src", comment.profileImageLink);
-
-				const userName = document.createElement("span");
-				userName.classList.add("mdc-typography--overline");
-				userName.classList.add("user-name");
-				userName.innerText = comment.userName;
-
-				const text = document.createElement("span");
-				text.classList.add("comment-text");
-				text.innerText = comment.content;
-
-				div.appendChild(img);
-				div.appendChild(userName);
-				div.appendChild(text);
-
-				imageshowcase.querySelector("#comments").appendChild(div);
-			});
+			img.comments.forEach(addComment);
 		}
 
 		imageshowcaseDialog.open();
@@ -348,7 +373,7 @@ firebase.auth().onAuthStateChanged(function(user) {
   }
 });
 
-const updateDarkTheme = isDark => isDark ?document.documentElement.classList.add("dark") : document.documentElement.classList.remove("dark");
+const updateDarkTheme = isDark => isDark ? document.documentElement.classList.add("dark") : document.documentElement.classList.remove("dark");
 
 const signInMenu = new mdc.menu.MDCMenu($("#sign-in-menu"));
 

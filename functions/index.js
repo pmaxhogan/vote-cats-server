@@ -58,6 +58,7 @@ const noCache = (req, res, next) => {
 // hard-fails if authentication is not present
 const authenticate = (req, res, next) => {
   if(!req.user) res.status(403).send("Invalid Token");
+	console.log(req.user);
 	next();
 };
 
@@ -259,6 +260,25 @@ app.use(base + "picts/:id/favorite", authenticate);
 app.use(base + "picts/:id/unfavorite", authenticate);
 app.put(base + "picts/:id/favorite", getFavorite(true));
 app.put(base + "picts/:id/unfavorite", getFavorite(false));
+
+app.use(base + "picts/:id/comment", authenticate);
+app.put(base + "picts/:id/comment", (req, res) => {
+	if(!req.query.content || typeof req.query.content !== "string" || req.query.content.length > 300 || req.query.content.length === 0) return res.status(400).end();
+
+	imagesRef.doc(req.params.id).get().then(doc => {
+		if(!doc.exists) return res.status(404).end();
+		const data = doc.data();
+		const comments = data.comments || [];
+		const comment = {picture: req.user.picture, username: req.user.name,content: req.query.content};
+		comments.push(comment);
+		imagesRef.doc(req.params.id).update({comments}).catch(e => {
+			console.error(e);
+			res.status(500).end();
+		});
+		res.status(200).json(comment);
+	});
+	// req.user.
+});
 
 exports.cats = functions.https.onRequest(app);
 

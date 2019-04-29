@@ -26,6 +26,8 @@ const dialog = new mdc.dialog.MDCDialog($("#sign-in-modal"));
 dialog.listen("MDCDialog:closed", e => {
 	if(e.detail.action === "accept"){
 		firebase.auth().signInWithPopup(new firebase.auth["GoogleAuthProvider"]()).then(() => dialog.close());
+	}else{
+		document.body.focus();
 	}
 });
 
@@ -144,9 +146,9 @@ const showcaseImage = id => {
 		procDeleteButton(imageshowcase.querySelector(".delete"), img.timeStamp);
 
 		const favButton = imageshowcase.querySelector(".add-to-favorites");
-		procFavButton(favButton, imageshowcaseDialogFavButton, img.timeStamp, imageshowcase.querySelector(".num-likes"));
+		procFavButton(favButton, imageshowcaseDialogFavButton, img.id, imageshowcase.querySelector(".num-likes"));
 
-		imageshowcase.setAttribute("data-timestamp", img.timeStamp);
+		imageshowcase.setAttribute("data-id", img.id);
 
 		imageshowcase.querySelector(".num-likes").innerText = img.numUsersVoted;
 
@@ -159,11 +161,11 @@ const showcaseImage = id => {
 		commentArea.onkeypress = e => {
 		  if(e.key === "Enter"){
 		    e.preventDefault();
-		    fetchIt("/api/v1/picts/" + img.timeStamp + "/comment?content=" + encodeURIComponent(commentArea.value), {method: "PUT"}).then(x=>{
+		    fetchIt("/api/v1/picts/" + img.id + "/comment?content=" + encodeURIComponent(commentArea.value), {method: "PUT"}).then(x=>{
 					if(x.ok) return x.json();
 					throw new Error(x.statusText);
 				}).then(obj => {
-					addComment(obj, img.timeStamp);
+					addComment(obj, img.id);
 			    commentArea.value = "";
 				});
 		    return false;
@@ -180,7 +182,7 @@ const showcaseImage = id => {
 		characterCounter = new mdc.textField.MDCTextFieldCharacterCounter($(".mdc-text-field-character-counter"));
 
 		if(img.comments && img.comments.length){
-			img.comments.forEach(comment => addComment(comment, img.timeStamp));
+			img.comments.forEach(comment => addComment(comment, img.id));
 		}
 
 		imageshowcaseDialog.open();
@@ -220,15 +222,15 @@ const updateAdmin = () => {
 	});
 };
 
-let lastTimeStamp = null;
+let lastId = null;
 
 let imgs = [];
 let myLikes = [];
 
 const updateLikes = () => {
-	document.querySelectorAll("[data-timestamp]").forEach(x=>x.mdcFavButton.on = false);
+	document.querySelectorAll("[data-id]").forEach(x=>x.mdcFavButton.on = false);
 	myLikes.forEach(like => {
-		const elems = document.querySelectorAll(`[data-timestamp="${like}"]`);
+		const elems = document.querySelectorAll(`[data-id="${like}"]`);
 		elems.forEach(elem => elem.mdcFavButton.on = true);
 	});
 };
@@ -266,7 +268,7 @@ const procDeleteButton = (button, id) => button.addEventListener("click", () => 
 		fetchIt("/api/v1/admin/picts/delete/" + id).then(resp => {
 			// if the request succeded, remove the panel
 			if(resp.ok){
-				document.querySelectorAll(`mdc-card[data-timeStamp="${id}"]`).forEach(elem => elem.remove());
+				document.querySelectorAll(`mdc-card[data-id="${id}"]`).forEach(elem => elem.remove());
 				imageshowcaseDialog.close();
 				return;
 			}
@@ -280,7 +282,7 @@ const addPict = pict => {
 	console.log(pict);
 	const panel = document.createElement("div");
 	panel.classList.add("mdc-card");
-	panel.setAttribute("data-timestamp", pict.timeStamp);
+	panel.setAttribute("data-id", pict.id);
 	panel.innerHTML = `
 <div class = "mdc-card__media mdc-card__primary-action" tabindex="0"><img src = "${pict.dispUrl || pict.url}"/>
 </div>
@@ -307,23 +309,23 @@ const addPict = pict => {
 	panel.mdcFavButton = mdcFavButton;
 
 	panel.querySelector(".mdc-card__primary-action").onclick = () => {
-		history.pushState(null, "", "/pict/" + pict.timeStamp);
+		history.pushState(null, "", "/pict/" + pict.id);
 		checkState();
 	};
 
 	// when the button is cliked
-	procFavButton(favButton, mdcFavButton, pict.timeStamp, panel.querySelector(".num-likes"));
+	procFavButton(favButton, mdcFavButton, pict.id, panel.querySelector(".num-likes"));
 
-	procDeleteButton(panel.querySelector(".delete"), pict.timeStamp);
+	procDeleteButton(panel.querySelector(".delete"), pict.id);
 	// console.log("\t" + pict.timeStamp);
-	lastTimeStamp = new Date(pict.timeStamp);
+	lastId = new Date(pict.id);
 	updateLikes();
 };
 
 const addImgs = num => {
 	let params = "";
-	if(lastTimeStamp){
-		params = "&startAfter=" + lastTimeStamp.toISOString();
+	if(lastId){
+		params = "&startAfter=" + lastId.toISOString();
 	}
 	const url = "/api/v1/picts/get?limit=" + num + params;
 	console.log(url);
@@ -338,7 +340,7 @@ const addImgs = num => {
 
 		imgs = imgs.concat(data);
 		data.forEach(addPict);
-		// console.log(lastTimeStamp, num);
+		// console.log(lastId, num);
 	}).catch(() => {
 		isLoading = false;
 	});
@@ -494,7 +496,7 @@ const emptyComments = () => imageshowcase.querySelector("#comments").innerHTML =
 
 const checkState = () => {
 	imgs = [];
-	lastTimeStamp = null;
+	lastId = null;
 	lastPage = loadedState;
 	console.log(loadedState, location.href);
 	if(loadedState !== location.href && hasLoaded){

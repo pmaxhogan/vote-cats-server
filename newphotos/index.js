@@ -21,9 +21,7 @@ const updateDoc = (name, value) => {
   return imagesRef.doc(name).set(value);
 };
 const addDoc = (value) => {
-  const d = (new Date).toISOString();
-  images[d] = value;
-  return imagesRef.doc(d).set(value);
+  return imagesRef.doc().set(value);
 };
 
 const imgSchema = {
@@ -77,7 +75,7 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 				img.redirUrl = res.url;
 	      i++;
 	      console.log("added img", img, "num", i);
-	      addDoc(img).then(() => i > 300 && process.exit());
+	      addDoc(img).then(() => i > 29 && process.exit());
 			});
 		});
   });

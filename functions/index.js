@@ -41,7 +41,8 @@ adminDoc.get().then(doc => {
 const checkIfAdmin = user => admins.includes(user.uid);
 
 // fixes the timestamp of an image.
-const procImageData = (data, user)=>{
+const procImageData = (data, user, id)=>{
+	data.id = id;
 	data.timeStamp = data.timeStamp.toDate();
 	if(user) data.iVoted = data.usersVoted.includes(user.uid);
 	// if you're not an admin, don't tell you who voted for who
@@ -162,7 +163,7 @@ app.get(base + "picts/get", (req, res) => {
   then(snapshot => {
     const data = [];
     snapshot.forEach(doc => {
-			data.push(procImageData(doc.data(), req.user));
+			data.push(procImageData(doc.data(), req.user, doc.id));
       data[doc.id] = doc.data();
     });
     res.json(data);
@@ -180,7 +181,7 @@ app.get(base + "picts/getalot", (req, res) => {
     const data = [];
     snapshot.forEach(doc => {
 			if(doc.exists){
-				data.push(procImageData(doc.data(), req.user));
+				data.push(procImageData(doc.data(), req.user, doc.id));
 	      data[doc.id] = doc.data();
 			}
     });
@@ -194,7 +195,7 @@ app.get(base + "picts/getalot", (req, res) => {
 app.get(base + "picts/:id", (req, res) => {
 	imagesRef.doc(req.params.id).get().then(doc => {
 		if(!doc.exists) return res.status(404).end();
-		res.json(procImageData(doc.data(), req.user));
+		res.json(procImageData(doc.data(), req.user, doc.id));
 	});
 });
 

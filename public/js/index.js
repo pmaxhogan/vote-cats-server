@@ -1,3 +1,4 @@
+/* global mdc, firebase, dateFns */
 mdc.autoInit();
 
 let textField = null;
@@ -15,10 +16,10 @@ const imageshowcase = $("#imageshowcase");
 const imageshowcaseDialog = new mdc.dialog.MDCDialog(imageshowcase);
 const imageshowcaseDialogFavButton = new mdc.iconButton.MDCIconButtonToggle(document.querySelector("#imageshowcase .add-to-favorites"));
 imageshowcaseDialog.listen("MDCDialog:opened", () => {
-  imageshowcaseDialogFavButton.ripple.layout();
+	imageshowcaseDialogFavButton.ripple.layout();
 });
 imageshowcaseDialog.listen("MDCDialog:closing", (e) => {
-  if(e.detail.action) history.pushState(lastPage || "/", "", lastPage || "/");
+	if(e.detail.action) history.pushState(lastPage || "/", "", lastPage || "/");
 	checkState();
 });
 
@@ -31,22 +32,23 @@ dialog.listen("MDCDialog:closed", e => {
 	}
 });
 
-let isFavsOnly = false;
 const switchToFavsOnly = () => {
 	isFavsOnly = true;
 	imgs = [];
 	myLikesLock.then(() => {
-		if(myLikes.length)
-		fetchIt(`/api/v1/picts/getalot?${myLikes.reduce((acc, like) => acc + "&ids[]=" + like, "").slice(1)}`).then(x=>x.json()).then(data => {
-			imgs = data;
-			myLikes - data.map(img => img.timeStamp);
-			data.forEach(img => addPict(img))
-		})});
+		if(myLikes.length){
+			fetchIt(`/api/v1/picts/getalot?${myLikes.reduce((acc, like) => acc + "&ids[]=" + like, "").slice(1)}`).then(x=>x.json()).then(data => {
+				imgs = data;
+				myLikes - data.map(img => img.timeStamp);
+				data.forEach(img => addPict(img));
+			});
+		}
+	});
 };
 const switchToAllPicts = () => {
 	isFavsOnly = false;
 	imgs = [];
-	addImgs(7 * calcNumColumns(innerWidth))
+	addImgs(7 * calcNumColumns(innerWidth));
 };
 
 // if if we've ran out of content
@@ -56,16 +58,12 @@ const thatsIt = new mdc.snackbar.MDCSnackbar($(".thats-it"));
 
 const calcPixelsLeft = () => getRealHeightOfHighestColumn() - (document.documentElement.scrollTop + innerHeight);
 
-customElements.define("masonry-panel",
-class extends HTMLElement {
-  constructor() {
-    super();
-    let template = document
-    .getElementById("panel-template")
-    .content;
-    const shadowRoot = this.attachShadow({mode: "open"})
-    .appendChild(template.cloneNode(true));
-  }
+customElements.define("masonry-panel", class extends HTMLElement {
+	constructor() {
+		super();
+		let template = document.getElementById("panel-template").content;
+		this.attachShadow({mode: "open"}).appendChild(template.cloneNode(true));
+	}
 });
 
 const fetchIt = async (url, options = {}, allowNoAuth = true) => {
@@ -124,7 +122,7 @@ const addComment = (comment, pictId) => {
 		fetchIt("/api/v1/picts/" + pictId + "/comment/" + encodeURIComponent(comment.id), {method: "DELETE"}).then(x=>{
 			if(x.ok) return;
 			throw new Error(x.statusText);
-		}).then(obj => {
+		}).then(() => {
 			div.remove();
 		});
 	};
@@ -159,17 +157,17 @@ const showcaseImage = id => {
 		textField = new mdc.textField.MDCTextField($(".mdc-text-field"));
 		const commentArea = $("#textarea");
 		commentArea.onkeypress = e => {
-		  if(e.key === "Enter"){
-		    e.preventDefault();
-		    fetchIt("/api/v1/picts/" + img.id + "/comment?content=" + encodeURIComponent(commentArea.value), {method: "PUT"}).then(x=>{
+			if(e.key === "Enter"){
+				e.preventDefault();
+				fetchIt("/api/v1/picts/" + img.id + "/comment?content=" + encodeURIComponent(commentArea.value), {method: "PUT"}).then(x=>{
 					if(x.ok) return x.json();
 					throw new Error(x.statusText);
 				}).then(obj => {
 					addComment(obj, img.id);
-			    commentArea.value = "";
+					commentArea.value = "";
 				});
-		    return false;
-		  }
+				return false;
+			}
 		};
 		commentArea.onfocus = () => {
 			if(!firebase.auth().currentUser){
@@ -191,24 +189,24 @@ const showcaseImage = id => {
 };
 
 const getRealHeightOfHighestColumn = () => {
-  return getShortestColumn().offsetHeight;
+	return getShortestColumn().offsetHeight;
 };
 
 const getShortestColumn = () => {
 	// get all columns
-  const columns = document.querySelectorAll(".masonry-layout-column");
+	const columns = document.querySelectorAll(".masonry-layout-column");
 	// and return the shortest one
-  return Array.from(columns).sort((a, b) => a.offsetHeight - b.offsetHeight)[0];
+	return Array.from(columns).sort((a, b) => a.offsetHeight - b.offsetHeight)[0];
 };
 
 let isAdmin = false;
 const disableAdmin = () => {
 	isAdmin = false;
-	document.body.classList.remove("admin")
+	document.body.classList.remove("admin");
 };
 const enableAdmin = () => {
 	isAdmin = true;
-	document.body.classList.add("admin")
+	document.body.classList.add("admin");
 };
 
 disableAdmin();
@@ -229,7 +227,7 @@ let myLikes = [];
 
 const updateLikes = () => {
 	document.querySelectorAll("[data-id]").forEach(x=>{
-		if(x.mdcFavButton) x.mdcFavButton.on = false
+		if(x.mdcFavButton) x.mdcFavButton.on = false;
 	});
 	myLikes.forEach(like => {
 		const elems = document.querySelectorAll(`[data-id="${like}"]`);
@@ -267,16 +265,16 @@ const procFavButton = (favButton, mdcFavButton, id, counter) => {
 };
 
 const procDeleteButton = (button, id) => button.addEventListener("click", () => {
-		fetchIt("/api/v1/admin/picts/delete/" + id).then(resp => {
-			// if the request succeded, remove the panel
-			if(resp.ok){
-				document.querySelectorAll(`mdc-card[data-id="${id}"]`).forEach(elem => elem.remove());
-				imageshowcaseDialog.close();
-				return;
-			}
-			throw new Error(resp.statusText);
-		});
+	fetchIt("/api/v1/admin/picts/delete/" + id).then(resp => {
+		// if the request succeded, remove the panel
+		if(resp.ok){
+			document.querySelectorAll(`mdc-card[data-id="${id}"]`).forEach(elem => elem.remove());
+			imageshowcaseDialog.close();
+			return;
+		}
+		throw new Error(resp.statusText);
 	});
+});
 
 const emptyColumns = () => document.querySelectorAll(".masonry-layout-column").forEach(x=>x.innerHTML="");
 
@@ -286,19 +284,19 @@ const addPict = pict => {
 	panel.classList.add("mdc-card");
 	panel.setAttribute("data-id", pict.id);
 	panel.innerHTML = `
-<div class = "mdc-card__media mdc-card__primary-action" tabindex="0"><img src = "${pict.dispUrl || pict.url}"/>
-</div>
-<div class="mdc-card__actions mdc-card__actions--full-bleed">
-<button class="add-to-favorites mdc-icon-button mdc-card__action mdc-card__action--icon"
- aria-label="Add to favorites"
- aria-hidden="true"
- aria-pressed="false">
- <i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
- <i class="material-icons mdc-icon-button__icon">favorite_border</i>
-</button>
-<span class = "mdc-typography--overline num-likes">${pict.numUsersVoted}</span>
-<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
-</div>`;
+	<div class = "mdc-card__media mdc-card__primary-action" tabindex="0"><img src = "${pict.dispUrl || pict.url}"/>
+	</div>
+	<div class="mdc-card__actions mdc-card__actions--full-bleed">
+	<button class="add-to-favorites mdc-icon-button mdc-card__action mdc-card__action--icon"
+	aria-label="Add to favorites"
+	aria-hidden="true"
+	aria-pressed="false">
+	<i class="material-icons mdc-icon-button__icon mdc-icon-button__icon--on">favorite</i>
+	<i class="material-icons mdc-icon-button__icon">favorite_border</i>
+	</button>
+	<span class = "mdc-typography--overline num-likes">${pict.numUsersVoted}</span>
+	<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon delete" title="Delete">delete</button>
+	</div>`;
 	// add the panel
 	getShortestColumn().appendChild(panel);
 
@@ -331,7 +329,7 @@ const addImgs = num => {
 	}
 	const url = "/api/v1/picts/get?limit=" + num + params;
 	// console.log(url);
-  return fetchIt(url).then(x=>x.json()).then(data => {
+	return fetchIt(url).then(x=>x.json()).then(data => {
 		// if we didn't get anything, tell the user
 		if(!data.length) noMore = true;
 		else noMore = false;
@@ -348,25 +346,22 @@ const addImgs = num => {
 	});
 };
 
-let last = 0;
 let isLoading = false;
-onscroll = e => {
-  if(!isLoading && !noMore){
-    last = Date.now();
-    const pixels = calcPixelsLeft();
-    if(pixels < 400){
+onscroll = () => {
+	if(!isLoading && !noMore){
+		const pixels = calcPixelsLeft();
+		if(pixels < 400){
 			isLoading = true;
-      addImgs(20).then(() => isLoading = false);
-      // console.log(pixels);
-      last -= 750;
-    }
-  }
+			addImgs(20).then(() => isLoading = false);
+			// console.log(pixels);
+		}
+	}
 
 	// if we've reached the end and we can't load more content
 	if(noMore && document.documentElement.scrollHeight - innerHeight - document.documentElement.scrollTop < 400){
 		thatsIt.open();
 	}
-}
+};
 
 let hasLoaded = false;
 firebase.auth().onAuthStateChanged(function(user) {
@@ -374,7 +369,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 		hasLoaded = true;
 		checkState();
 	}
-  if (user) {
+	if (user) {
 		myLikesLock = fetchIt("/api/v1/mylikes").then(x=>{
 			if(x.ok) return x.json();
 			throw new Error(x.statusText);
@@ -389,33 +384,33 @@ firebase.auth().onAuthStateChanged(function(user) {
 		});
 
 
-    // User is signed in.thats-it
-    var displayName = user.displayName;
-    var email = user.email;
-    var emailVerified = user.emailVerified;
-    var photoURL = user.photoURL;
-    var isAnonymous = user.isAnonymous;
-    var uid = user.uid;
-    var providerData = user.providerData;
+		// User is signed in.thats-it
+		var displayName = user.displayName;
+		var email = user.email;
+		var emailVerified = user.emailVerified;
+		var photoURL = user.photoURL;
+		var isAnonymous = user.isAnonymous;
+		var uid = user.uid;
+		var providerData = user.providerData;
 
-    console.log("SIGNED IN", {displayName, email, emailVerified, photoURL, isAnonymous, uid, providerData});
+		console.log("SIGNED IN", {displayName, email, emailVerified, photoURL, isAnonymous, uid, providerData});
 
-    $("#signed-out").classList.add("hidden");
-    $("#signed-in").classList.remove("hidden");
+		$("#signed-out").classList.add("hidden");
+		$("#signed-in").classList.remove("hidden");
 
-    const text = $("#profile").querySelector("span");
-    text.innerText = displayName;
+		const text = $("#profile").querySelector("span");
+		text.innerText = displayName;
 
-    const img = $("#profile").querySelector("img");
-    img.src = user.photoURL;
+		const img = $("#profile").querySelector("img");
+		img.src = user.photoURL;
 		updateAdmin();
-  } else {
-    // User is signed out.
-    console.log("SIGNED OUT");
-    $("#signed-out").classList.remove("hidden")
-    $("#signed-in").classList.add("hidden");
+	} else {
+		// User is signed out.
+		console.log("SIGNED OUT");
+		$("#signed-out").classList.remove("hidden");
+		$("#signed-in").classList.add("hidden");
 		disableAdmin();
-  }
+	}
 });
 
 const updateDarkTheme = isDark => isDark ? document.documentElement.classList.add("dark") : document.documentElement.classList.remove("dark");
@@ -442,7 +437,7 @@ $("#sign-in-or-sign-up").onclick = () => {
 
 $("button#sign-out").onclick = () => firebase.auth().signOut();
 document.querySelectorAll(".sign-in").forEach(button => button.onclick = () => {
-  firebase.auth().signInWithPopup(new firebase.auth[button.dataset.authName + "AuthProvider"]());
+	firebase.auth().signInWithPopup(new firebase.auth[button.dataset.authName + "AuthProvider"]());
 });
 
 let currentColumns = 5;
@@ -492,7 +487,7 @@ const updateColumns = () => {
 onresize = () => updateColumns();
 updateColumns();
 
-onpopstate = e => checkState();
+onpopstate = () => checkState();
 
 const emptyComments = () => imageshowcase.querySelector("#comments").innerHTML = "";
 

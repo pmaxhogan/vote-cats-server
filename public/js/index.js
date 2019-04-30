@@ -33,7 +33,6 @@ dialog.listen("MDCDialog:closed", e => {
 });
 
 const switchToFavsOnly = () => {
-	isFavsOnly = true;
 	imgs = [];
 	myLikesLock.then(() => {
 		if(myLikes.length){
@@ -46,7 +45,6 @@ const switchToFavsOnly = () => {
 	});
 };
 const switchToAllPicts = () => {
-	isFavsOnly = false;
 	imgs = [];
 	addImgs(7 * calcNumColumns(innerWidth));
 };

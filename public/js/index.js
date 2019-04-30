@@ -17,8 +17,8 @@ const imageshowcaseDialogFavButton = new mdc.iconButton.MDCIconButtonToggle(docu
 imageshowcaseDialog.listen("MDCDialog:opened", () => {
   imageshowcaseDialogFavButton.ripple.layout();
 });
-imageshowcaseDialog.listen("MDCDialog:closing", () => {
-  history.pushState(null, "", lastPage || "/");
+imageshowcaseDialog.listen("MDCDialog:closing", (e) => {
+  if(e.detail.action) history.pushState(lastPage || "/", "", lastPage || "/");
 	checkState();
 });
 
@@ -228,7 +228,9 @@ let imgs = [];
 let myLikes = [];
 
 const updateLikes = () => {
-	document.querySelectorAll("[data-id]").forEach(x=>x.mdcFavButton.on = false);
+	document.querySelectorAll("[data-id]").forEach(x=>{
+		if(x.mdcFavButton) x.mdcFavButton.on = false
+	});
 	myLikes.forEach(like => {
 		const elems = document.querySelectorAll(`[data-id="${like}"]`);
 		elems.forEach(elem => elem.mdcFavButton.on = true);
@@ -279,7 +281,7 @@ const procDeleteButton = (button, id) => button.addEventListener("click", () => 
 const emptyColumns = () => document.querySelectorAll(".masonry-layout-column").forEach(x=>x.innerHTML="");
 
 const addPict = pict => {
-	console.log(pict);
+	// console.log(pict);
 	const panel = document.createElement("div");
 	panel.classList.add("mdc-card");
 	panel.setAttribute("data-id", pict.id);
@@ -309,7 +311,7 @@ const addPict = pict => {
 	panel.mdcFavButton = mdcFavButton;
 
 	panel.querySelector(".mdc-card__primary-action").onclick = () => {
-		history.pushState(null, "", "/pict/" + pict.id);
+		history.pushState("/pict/" + pict.id, "", "/pict/" + pict.id);
 		checkState();
 	};
 
@@ -328,7 +330,7 @@ const addImgs = num => {
 		params = "&startAfter=" + lastId.toISOString();
 	}
 	const url = "/api/v1/picts/get?limit=" + num + params;
-	console.log(url);
+	// console.log(url);
   return fetchIt(url).then(x=>x.json()).then(data => {
 		// if we didn't get anything, tell the user
 		if(!data.length) noMore = true;
@@ -355,7 +357,7 @@ onscroll = e => {
     if(pixels < 400){
 			isLoading = true;
       addImgs(20).then(() => isLoading = false);
-      console.log(pixels);
+      // console.log(pixels);
       last -= 750;
     }
   }
@@ -490,7 +492,7 @@ const updateColumns = () => {
 onresize = () => updateColumns();
 updateColumns();
 
-onpopstate = () => checkState();
+onpopstate = e => checkState();
 
 const emptyComments = () => imageshowcase.querySelector("#comments").innerHTML = "";
 
@@ -498,18 +500,21 @@ const checkState = () => {
 	imgs = [];
 	lastId = null;
 	lastPage = loadedState;
-	console.log(loadedState, location.href);
-	if(loadedState !== location.href && hasLoaded){
-		console.log("loading", location.href);
-		loadedState = location.href;
-		if(loadedState  === "/favs" || location.pathname === "/favs") emptyColumns();
+	// console.log("loadedState vs location.pathname", loadedState, location.pathname);
+	if(loadedState !== location.pathname && hasLoaded){
+		// console.log("loading", location.pathname);
+		loadedState = location.pathname;
 		emptyComments();
+
+		imageshowcaseDialog.close();
+
 		setTimeout(() => {
 			if(location.pathname === "/"){
+				emptyColumns();
 				document.title = "Home - Vote Cats";
-				console.log("switchToAllPicts");
 				switchToAllPicts();
 			}else if(location.pathname === "/favs"){
+				emptyColumns();
 				document.title = "My Favorites - Vote Cats";
 				switchToFavsOnly();
 			}else if(location.pathname.startsWith("/pict/")){
@@ -526,7 +531,7 @@ const checkState = () => {
 //history.pushState(null, "", "/")
 
 document.querySelectorAll("[data-spa]").forEach(link => link.onclick = e => {
-	history.pushState(null, "", link.getAttribute("href"));
+	history.pushState(link.getAttribute("href"), "", link.getAttribute("href"));
 	checkState();
 	e.preventDefault();
 	return false;

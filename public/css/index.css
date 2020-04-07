@@ -77,7 +77,7 @@ h1 {
 	display: flex;
 	flex-basis: 33%;
 	flex-direction: column;
-	flex-grow: 0;
+	flex-grow: 1;
 	padding: var(--gutter-size);
 	max-height: fit-content;
 }
@@ -239,4 +239,25 @@ body.admin .delete{
 
 #imageshowcase-content .mdc-floating-label--float-above{
 	color: var(--mdc-theme-primary);
+}
+
+.mdc-top-app-bar__title {
+	padding-left: 0;
+}
+
+#title-icon{
+	height: 24px;
+	vertical-align: middle;
+}
+
+@media screen and (max-width: 520px){
+	#title-text{
+		display: none;
+	}
+}
+
+@media screen and (max-width: 350px){
+	#title-icon{
+		display: none;
+	}
 }

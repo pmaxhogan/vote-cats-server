@@ -7,7 +7,10 @@ const {parseString} = require("xml2js");
 const basePath = "images";
 
 // Initialize the app with a service account, granting admin privileges
-admin.initializeApp({storageBucket: "vote-cats.appspot.com"});
+admin.initializeApp({
+	credential: admin.credential.cert(require("./SUPERPRIVATEKEY")),
+	storageBucket: "vote-cats.appspot.com"
+});
 
 // As an admin, the app has access to read and write all data, regardless of Security Rules
 const db = admin.firestore();
@@ -75,7 +78,7 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 				img.redirUrl = res.url;
 	      i++;
 	      console.log("added img", img, "num", i);
-	      addDoc(img).then(() => i > 29 && process.exit());
+	      addDoc(img).then(() => i > 300 && process.exit());
 			});
 		});
   });

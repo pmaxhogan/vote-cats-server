@@ -2,3 +2,4 @@ SUPERPRIVATEKEY.json
 node_modules/
 *.log
 *.cache
+.runtimeconfig.json

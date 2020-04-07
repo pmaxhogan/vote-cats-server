@@ -194,7 +194,11 @@ const getShortestColumn = () => {
 	// get all columns
 	const columns = document.querySelectorAll(".masonry-layout-column");
 	// and return the shortest one
-	return Array.from(columns).sort((a, b) => a.offsetHeight - b.offsetHeight)[0];
+	// columns don't show their real height, we have to sum the height of their children
+	return Array.from(columns).map(column=>{
+		column.realHeight = Array.from(column.children).map(child => child.offsetHeight).reduce((a, b)=>a + b, 0);
+		return column;
+	}).sort((a, b) => a.realHeight - b.realHeight)[0];
 };
 
 let isAdmin = false;
@@ -277,7 +281,6 @@ const procDeleteButton = (button, id) => button.addEventListener("click", () => 
 const emptyColumns = () => document.querySelectorAll(".masonry-layout-column").forEach(x=>x.innerHTML="");
 
 const addPict = pict => {
-	// console.log(pict);
 	const panel = document.createElement("div");
 	panel.classList.add("mdc-card");
 	panel.setAttribute("data-id", pict.id);
@@ -316,7 +319,7 @@ const addPict = pict => {
 
 	procDeleteButton(panel.querySelector(".delete"), pict.id);
 	// console.log("\t" + pict.timeStamp);
-	lastId = new Date(pict.id);
+	lastId = new Date(pict.date);
 	updateLikes();
 };
 

@@ -11,8 +11,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "express": "^4.16.2",
-    "firebase-admin": "^7.2.0",
-    "grpc": "^1.12.4",
+    "firebase-admin": "^8.10.0",
     "node-fetch": "^1.7.3",
     "sharp": "^0.22.0",
     "xml2js": "^0.4.19"

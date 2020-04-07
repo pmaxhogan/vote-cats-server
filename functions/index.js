@@ -13,12 +13,14 @@ app.use(express.json({
   strict: true,
   type: "application/json",
   verify: undefined
-}))
+}));
 
 const base = "/api/v1/";
-
 // Initialize the app with a service account, granting admin privileges
-admin.initializeApp();
+admin.initializeApp({
+	credential: admin.credential.cert(functions.config().creds),
+	databaseURL: "https://vote-cats.firebaseio.com"
+});
 
 const db = admin.firestore();
 //const bucket = admin.storage().bucket();
@@ -102,13 +104,17 @@ const authenticateAdmin = (req, res, next) => {
 		}else{
 			console.log("did not find admin", req.user.id, "in", admins);
 			res.status(403).send("Unauthorized");
-			return;
 		}
 	});
 };
 
 app.use(base + "auth/", authenticate);
 app.get(base + "auth", (req, res) => res.send("Auth successful."));
+
+
+app.get("", (req, res) => {
+	res.send("Hello!");
+});
 
 app.get(base, (req, res) => {
   res.send("Hello, World!");

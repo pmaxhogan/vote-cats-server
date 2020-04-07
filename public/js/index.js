@@ -432,14 +432,22 @@ const signInMenu = new mdc.menu.MDCMenu($("#sign-in-menu"));
 
 const menu = new mdc.menu.MDCMenu($("#settings"));
 const darkTheme = new mdc.switchControl.MDCSwitch($("#dark-theme"));
-darkTheme.listen("change", () => {
+const darkThemeLabel = $("#dark-theme-label");
+
+darkThemeLabel.onclick = () => {
+	darkTheme.checked = !darkTheme.checked;
+	setDarkTheme();
+};
+
+const setDarkTheme = () => {
 	fetchIt("/api/v1/auth/profile", {method: "PATCH", body: JSON.stringify({darkTheme: darkTheme.checked})}).then(resp => {
 		if(!resp.ok) throw new Error(resp.statusText);
 		updateDarkTheme(darkTheme.checked);
 	}).catch(() => {
 		darkTheme.checked = !darkTheme.checked;
 	});
-});
+};
+darkTheme.listen("change", setDarkTheme);
 
 $("#profile").onclick = () => {
 	menu.open = !menu.open;

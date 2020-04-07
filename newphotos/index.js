@@ -78,7 +78,7 @@ const newImg = () => fetch("https://thecatapi.com/api/images/get?api_key=MzM3NDU
 				img.redirUrl = res.url;
 	      i++;
 	      console.log("added img", img, "num", i);
-	      addDoc(img).then(() => i > 300 && process.exit());
+	      addDoc(img).then(() => i > 999 && process.exit());
 			});
 		});
   });

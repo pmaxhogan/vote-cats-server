@@ -28,7 +28,7 @@ dialog.listen("MDCDialog:closed", e => {
 	if(e.detail.action === "accept"){
 		firebase.auth().signInWithPopup(new firebase.auth["GoogleAuthProvider"]()).then(() => dialog.close());
 	}else{
-		document.body.focus();
+		document.body.blur();
 	}
 });
 
@@ -53,6 +53,7 @@ const switchToAllPicts = () => {
 let noMore = false;
 // the snackbar to tell us we've ran out of content
 const thatsIt = new mdc.snackbar.MDCSnackbar($(".thats-it"));
+let thatsItTimeout;
 
 const calcPixelsLeft = () => getRealHeightOfHighestColumn() - (document.documentElement.scrollTop + innerHeight);
 
@@ -126,6 +127,7 @@ const addComment = (comment, pictId) => {
 	};
 };
 
+let commentWait = false;
 const showcaseImage = id => {
 	fetchIt(`/api/v1/picts/${id}`).then(x=>{
 		if(x.ok){
@@ -169,8 +171,14 @@ const showcaseImage = id => {
 		};
 		commentArea.onfocus = () => {
 			if(!firebase.auth().currentUser){
-				$("#fav-dialog-title").innerText = "You need to be signed in to comment on a picture";
-				dialog.open();
+				if(commentWait){
+					commentArea.blur();
+					commentWait = false;
+				}else {
+					$("#fav-dialog-title").innerText = "You need to be signed in to comment on a picture";
+					dialog.open();
+					commentWait = true;
+				}
 			}
 		};
 
@@ -361,6 +369,10 @@ onscroll = () => {
 	// if we've reached the end and we can't load more content
 	if(noMore && document.documentElement.scrollHeight - innerHeight - document.documentElement.scrollTop < 400){
 		thatsIt.open();
+		if(thatsItTimeout !== undefined){
+			clearTimeout(thatsItTimeout);
+		}
+		thatsItTimeout = setTimeout(() => thatsIt.close(), 3000);
 	}
 };
 

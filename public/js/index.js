@@ -540,6 +540,7 @@ const checkState = () => {
 				// basic 404 handling
 				location.href = "/";
 			}
+			$("#loading").hidden = true;
 		}, 0);
 	}
 };
